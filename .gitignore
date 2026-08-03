@@ -1,0 +1,4 @@
+n8n_data/
+.venv/
+__pycache__/
+*.pyc
