@@ -1,4 +1,5 @@
-n8n_data/
+.n8n_data/
+.data/
 .venv/
 __pycache__/
 *.pyc
