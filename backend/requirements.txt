@@ -3,3 +3,5 @@ uvicorn[standard]
 sqlalchemy
 requests
 python-dotenv
+beautifulsoup4
+markdownify
