@@ -6,24 +6,30 @@ else
 endif
 
 RM := rm -rf
-BACKEND_DIR := backend
-VENV_DIR := $(BACKEND_DIR)/.venv
-WORKFLOWS_DIR := workflows
-N8N_DIR := .n8n_data
-SCRIPTS_DIR := scripts
 
+# Pastas do projeto
+SCRIPTS_DIR := scripts
+WORKFLOWS_DIR := workflows
+BACKEND_DIR := backend
+
+# Pastas temporárias
+VENV_DIR := $(BACKEND_DIR)/.venv
+N8N_DIR := .n8n_data
+
+# venv
 # Auto-detecta o caminho do executável do Python e do pip dentro do virtualenv
 VENV_BIN     = $(firstword $(wildcard $(VENV_DIR)/Scripts $(VENV_DIR)/bin))
-PYTHON_VENV  = $(firstword $(wildcard $(VENV_BIN)/python.exe $(VENV_BIN)/python))
-PIP_VENV     = $(firstword $(wildcard $(VENV_BIN)/pip.exe $(VENV_BIN)/pip))
+ACTIVATE = . $(VENV_BIN)/activate
+PIP = pip
 
 DOCKER_N8N := docker compose exec n8n
 
 .PHONY: setup start stop clean
 
 setup: $(VENV_DIR)
-	$(PYTHON_VENV) -m pip install --upgrade pip
-	$(PIP_VENV) install -r backend/requirements.txt
+	$(ACTIVATE) && $(PYTHON) -m pip install --upgrade pip
+	$(ACTIVATE) && $(PIP) install -r backend/requirements.txt
+	$(ACTIVATE) && cd backend && $(PIP) install -e .
 
 start:
 	docker compose up -d --build
@@ -59,6 +65,7 @@ export-workflows: start-n8n
 clean:
 	rm -rf $(VENV_DIR)
 	find . -type d -name "__pycache__" -exec rm -rf {} +
+	find . -type d -name "*.egg-info" -exec rm -rf {} +
 	find . -type f -name "*.pyc" -delete
 	docker compose down -v --remove-orphans
 	docker system prune -f
