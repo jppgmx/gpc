@@ -91,8 +91,18 @@ class DataStore:
         self._write_cache_meta(descriptor.path)
 
     def read(self, descriptor: FileDescriptor, io: IOHandler | None = None) -> Any:
+        if not self.exists(descriptor):
+            relpath = self._relative_to_root(descriptor.path)
+            raise FileNotFoundError(f"Arquivo {relpath} não encontrado.")
         io = io or TextIO()
         return io.read(descriptor.path)
+
+    def remove(self, descriptor: FileDescriptor) -> None:
+        if self.exists(descriptor):
+            descriptor.path.unlink()
+        meta_path = self._meta_path(descriptor.path)
+        if meta_path.exists():
+            meta_path.unlink()
 
     def is_stale(self, descriptor: FileDescriptor, max_age_seconds: int) -> bool:
         if not self.exists(descriptor):
@@ -120,6 +130,9 @@ class DataStore:
             json.dumps({"cached_at": datetime.now(timezone.utc).isoformat()}),
             encoding="utf-8",
         )
+
+    def _relative_to_root(self, path: Path) -> Path:
+        return path.relative_to(self.root)
 
     def _ensure_dir_exists(self, path: Path, isparent: bool = False) -> None:
         if isparent:
