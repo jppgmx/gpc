@@ -1,0 +1,232 @@
+{
+  "updatedAt": "2026-08-06T23:28:47.546Z",
+  "createdAt": "2026-08-03T18:38:26.827Z",
+  "id": "EfGUhRGM7wMCYnyR",
+  "name": "gpc-agent",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -208,
+        -32
+      ],
+      "id": "debb56ab-bb1d-490c-b594-57d1170afeb3",
+      "name": "When chat message received",
+      "webhookId": "b099730b-5a82-4aa3-acb5-7433672498d8"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Você é o GPC (Garoto de Programa Competitivo), um assistente especializado em ajudar usuários a navegar a plataforma CodeForces.\n\nSeu escopo:\n- Explicar regras, diretrizes e FAQ da plataforma\n- Avisar sobre quaisquer mudanças no sistema da plataforma.\n- Informar sobre calendário de contests\n- Ajudar a buscar problemas do banco de questões por rating/tag\n- Dar suporte a dúvidas de programação em C/C++\n\nRegras:\n- Se não souber algo com certeza, diga que não sabe em vez de inventar uma resposta\n- Respostas objetivas, sem enrolação\n- Responda sempre em português, a menos que o usuário escreva em outro idioma"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        144,
+        -32
+      ],
+      "id": "74300270-7109-4e27-b3a8-f1707331fe43",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatCohere",
+      "typeVersion": 1,
+      "position": [
+        24,
+        200
+      ],
+      "id": "31239c39-1ef5-440a-bcfa-b679f80a0f37",
+      "name": "Cohere Chat Model",
+      "credentials": {
+        "cohereApi": {
+          "id": "vZhESv2mOjR21yNZ",
+          "name": "GPC-Agente-key"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        152,
+        200
+      ],
+      "id": "e2bc009b-c865-420e-9dea-e2cbc8d2a55d",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Retorna o status atual do sistema do CodeForces. Use quando o usuário perguntar se a API/plataforma está no ar, funcionando sem nenhum problema e/ou instabilidade.",
+        "url": "https://codeforces.com/api/system.status",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        280,
+        200
+      ],
+      "id": "65bcad99-fbd6-4dbb-b7c1-4b9990b72417",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use essa ferramenta para obter documentos relacionados a plataforma do CodeForces. Isso inclui:\n- Política de Privacidade\n- Termos e Condições",
+        "memoryKey": {
+          "__rl": true,
+          "value": "gpc_vs_documents",
+          "mode": "id"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        408,
+        200
+      ],
+      "id": "a849f32d-cf0a-4896-8888-6cdd04092e43",
+      "name": "Simple Vector Store"
+    },
+    {
+      "parameters": {
+        "modelName": "embed-multilingual-v3.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        488,
+        408
+      ],
+      "id": "0c9e7be8-762e-48e9-8974-4c877897dd0d",
+      "name": "Embeddings Cohere",
+      "credentials": {
+        "cohereApi": {
+          "id": "vZhESv2mOjR21yNZ",
+          "name": "GPC-Agente-key"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cohere Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "8c5bf01e-53fc-40e4-a8ff-56d43525a65d",
+  "activeVersionId": null,
+  "versionCounter": 52,
+  "triggerCount": 0,
+  "sourceWorkflowId": null,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-08-03T18:38:26.837Z",
+      "createdAt": "2026-08-03T18:38:26.837Z",
+      "role": "workflow:owner",
+      "workflowId": "EfGUhRGM7wMCYnyR",
+      "projectId": "VEa0qhDZUSCFZ0m7",
+      "project": {
+        "updatedAt": "2026-08-02T23:27:20.913Z",
+        "createdAt": "2026-08-02T23:23:54.595Z",
+        "id": "VEa0qhDZUSCFZ0m7",
+        "name": "João Paulo Dantas Soares <jppgmx24@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "350a1ef9-2a97-4fc3-bad0-e96ec696cb6c"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
+  }
+}

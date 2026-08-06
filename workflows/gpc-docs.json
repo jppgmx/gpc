@@ -1,0 +1,229 @@
+{
+  "updatedAt": "2026-08-06T20:03:54.172Z",
+  "createdAt": "2026-08-04T14:07:49.693Z",
+  "id": "rh0NzGjUX0KmOJns",
+  "name": "gpc-docs",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        -48
+      ],
+      "id": "73806f4d-80b3-4141-ac03-b3743aaabb58",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "value": "gpc_vs_documents",
+          "mode": "id"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        48,
+        -48
+      ],
+      "id": "83fb051a-d39a-4d9d-97ee-cacc5bfd49a4",
+      "name": "Simple Vector Store"
+    },
+    {
+      "parameters": {
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        152,
+        184
+      ],
+      "id": "4c4448b4-2f1a-4978-8444-03759d79a8dc",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "modelName": "embed-multilingual-v3.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        24,
+        184
+      ],
+      "id": "03460fbe-dd21-46ef-a663-e777c11e5c25",
+      "name": "Embeddings Cohere",
+      "credentials": {
+        "cohereApi": {
+          "id": "vZhESv2mOjR21yNZ",
+          "name": "GPC-Agente-key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "http://backend:8000/docs/terms",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -208,
+        -144
+      ],
+      "id": "9d18ed9e-a35a-4bfb-87e5-47c9c0b4bc36",
+      "name": "Terms"
+    },
+    {
+      "parameters": {
+        "url": "http://backend:8000/docs/privacy",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -208,
+        48
+      ],
+      "id": "958257a2-27ae-4227-adf5-c6502853ad3c",
+      "name": "Privacy"
+    },
+    {
+      "parameters": {
+        "chunkSize": 500,
+        "chunkOverlap": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        232,
+        392
+      ],
+      "id": "b3ce7d42-4b93-4e13-a789-6c25ad6b8c20",
+      "name": "Character Text Splitter"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Terms",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Privacy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Terms": {
+      "main": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Privacy": {
+      "main": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "pinData": {},
+  "versionId": "065c5302-fef2-45db-9f38-df82febea253",
+  "activeVersionId": null,
+  "versionCounter": 39,
+  "triggerCount": 0,
+  "sourceWorkflowId": null,
+  "tags": [],
+  "shared": [
+    {
+      "updatedAt": "2026-08-04T14:07:49.708Z",
+      "createdAt": "2026-08-04T14:07:49.708Z",
+      "role": "workflow:owner",
+      "workflowId": "rh0NzGjUX0KmOJns",
+      "projectId": "VEa0qhDZUSCFZ0m7",
+      "project": {
+        "updatedAt": "2026-08-02T23:27:20.913Z",
+        "createdAt": "2026-08-02T23:23:54.595Z",
+        "id": "VEa0qhDZUSCFZ0m7",
+        "name": "João Paulo Dantas Soares <jppgmx24@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "350a1ef9-2a97-4fc3-bad0-e96ec696cb6c"
+      }
+    }
+  ],
+  "versionMetadata": {
+    "name": null,
+    "description": null
+  }
+}
