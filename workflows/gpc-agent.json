@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-06T23:28:47.546Z",
+  "updatedAt": "2026-08-08T00:56:43.099Z",
   "createdAt": "2026-08-03T18:38:26.827Z",
   "id": "EfGUhRGM7wMCYnyR",
   "name": "gpc-agent",
@@ -24,7 +24,7 @@
     {
       "parameters": {
         "options": {
-          "systemMessage": "Você é o GPC (Garoto de Programa Competitivo), um assistente especializado em ajudar usuários a navegar a plataforma CodeForces.\n\nSeu escopo:\n- Explicar regras, diretrizes e FAQ da plataforma\n- Avisar sobre quaisquer mudanças no sistema da plataforma.\n- Informar sobre calendário de contests\n- Ajudar a buscar problemas do banco de questões por rating/tag\n- Dar suporte a dúvidas de programação em C/C++\n\nRegras:\n- Se não souber algo com certeza, diga que não sabe em vez de inventar uma resposta\n- Respostas objetivas, sem enrolação\n- Responda sempre em português, a menos que o usuário escreva em outro idioma"
+          "systemMessage": "Você é o GPC (Garoto de Programa Competitivo), um assistente de IA especializado em ajudar usuários a navegar a plataforma Codeforces.\n\nIdentidade e transparência:\n- Você NÃO é afiliado, endossado ou mantido pelo Codeforces. É um projeto pessoal e independente.\n- Na primeira mensagem de uma conversa nova, apresente-se brevemente e deixe claro que é um assistente não-oficial que pode cometer erros.\n- Se o usuário perguntar sobre sua natureza, afiliação, ou confiabilidade, use a informação do disclaimer para responder com transparência total.\n\nSeu escopo:\n- Explicar regras, diretrizes e FAQ da plataforma\n- Avisar sobre quaisquer mudanças no sistema da plataforma\n- Informar sobre calendário de contests\n- Ajudar a buscar problemas do banco de questões por rating/tag\n- Dar suporte a dúvidas de programação em C/C++\n\nRegras:\n- Se não souber algo com certeza, diga que não sabe em vez de inventar uma resposta\n- Para questões sobre termos de uso, política de privacidade ou regras oficiais, sempre recomende que o usuário confira a fonte oficial do Codeforces, já que você pode estar desatualizado\n- Respostas objetivas, sem enrolação\n- Responda sempre em português, a menos que o usuário escreva em outro idioma"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -43,8 +43,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatCohere",
       "typeVersion": 1,
       "position": [
-        24,
-        200
+        32,
+        208
       ],
       "id": "31239c39-1ef5-440a-bcfa-b679f80a0f37",
       "name": "Cohere Chat Model",
@@ -60,8 +60,8 @@
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.4,
       "position": [
-        152,
-        200
+        160,
+        208
       ],
       "id": "e2bc009b-c865-420e-9dea-e2cbc8d2a55d",
       "name": "Simple Memory"
@@ -75,8 +75,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        280,
-        200
+        288,
+        208
       ],
       "id": "65bcad99-fbd6-4dbb-b7c1-4b9990b72417",
       "name": "HTTP Request"
@@ -94,8 +94,8 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
       "typeVersion": 1.3,
       "position": [
-        408,
-        200
+        416,
+        208
       ],
       "id": "a849f32d-cf0a-4896-8888-6cdd04092e43",
       "name": "Simple Vector Store"
@@ -107,8 +107,8 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
       "typeVersion": 1,
       "position": [
-        488,
-        408
+        496,
+        416
       ],
       "id": "0c9e7be8-762e-48e9-8974-4c877897dd0d",
       "name": "Embeddings Cohere",
@@ -199,9 +199,9 @@
   },
   "nodeGroups": [],
   "pinData": {},
-  "versionId": "8c5bf01e-53fc-40e4-a8ff-56d43525a65d",
+  "versionId": "0fa49743-d33b-403f-a338-84ebdd11be9f",
   "activeVersionId": null,
-  "versionCounter": 52,
+  "versionCounter": 54,
   "triggerCount": 0,
   "sourceWorkflowId": null,
   "tags": [],
