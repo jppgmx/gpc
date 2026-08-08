@@ -1,9 +1,17 @@
+"""
+    Módulo para transformar documentos HTML em Markdown
+"""
+
 from markdownify import MarkdownConverter
 
 from models.document import Document, DocumentType
 from services.document_provider import Transformer
 
 class HTML2MarkdownTransformer(Transformer):
+    """
+    Transformer para converter documentos HTML em Markdown
+    """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.converter_cls = kwargs.get("converter_cls", MarkdownConverter)

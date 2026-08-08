@@ -26,23 +26,42 @@ DOCKER_N8N := docker compose exec n8n
 
 .PHONY: setup start stop clean
 
+# Configura ambiente de desenvolvimento
 setup: $(VENV_DIR)
 	$(ACTIVATE) && $(PYTHON) -m pip install --upgrade pip
 	$(ACTIVATE) && $(PIP) install -r backend/requirements.txt
+	$(ACTIVATE) && $(PIP) install -r backend/requirements-dev.txt
 	$(ACTIVATE) && cd backend && $(PIP) install -e .
 
+# Roda pylint
+pylint:
+	$(ACTIVATE) && pylint backend/app
+
+# Inicia os containers do docker
 start:
 	docker compose up -d --build
 
+# Inicia apenas o container do n8n
 start-n8n:
 	docker compose up -d n8n
 
+# Inicia apenas o container do backend
 start-backend:
 	docker compose up -d --build backend
 
+# Para parar os containers do docker
 stop:
 	docker compose down
 
+# Para parar apenas o container do n8n
+stop-n8n:
+	docker compose down n8n
+
+# Para parar apenas o container do backend
+stop-backend:
+	docker compose down backend
+
+# Exporta todos os workflows do n8n para a pasta workflows
 export-workflows: start-n8n
 	mkdir -p $(WORKFLOWS_DIR)
 	$(DOCKER_N8N) sh -lc 'rm -rf /home/node/.n8n/exports'
@@ -62,6 +81,7 @@ export-workflows: start-n8n
 	
 	$(PYTHON) $(SCRIPTS_DIR)/copy_workflows.py "$(N8N_DIR)/exports" "$(WORKFLOWS_DIR)"
 
+# Limpa arquivos temporários, venv e containers do docker
 clean:
 	rm -rf $(VENV_DIR)
 	find . -type d -name "__pycache__" -exec rm -rf {} +
@@ -70,6 +90,7 @@ clean:
 	docker compose down -v --remove-orphans
 	docker system prune -f
 
+# Cria venv caso não exista
 $(VENV_DIR):
 	$(PYTHON) -m venv $(VENV_DIR)
 	

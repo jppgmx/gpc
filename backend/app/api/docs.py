@@ -1,3 +1,7 @@
+"""
+    API de documentos
+"""
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import PlainTextResponse
 
@@ -14,6 +18,8 @@ data_store = DataStore()
 provider = DocumentProvider(data_store=data_store)
 
 data_store.allocate_dir("docs")
+
+# Documento 'terms' - Termos e Condições do Codeforces
 provider.add_source(
     source=URLSource(
         document_id="terms",
@@ -33,14 +39,14 @@ provider.add_source(
         data_store=data_store,
 
         # Eu particularmente achei algo muito estranho:
-        # O site do Codeforces é protegido pelo Cloudflare, e obviamente com os seus desafios de bot,
-        # então se você fizer uma requisição simples, ele vai bloquear e retornar um erro 403.
-        # Então, para contornar isso, eu adicionei um User-Agent de um navegador e por incrível que
-        # pareça, funciona. Apliquei no curl, também. Mas eu que uso PowerShell, algo faz com que o .NET
-        # não funciona. Eu não entendo a natureza do Cloudflare.
+        # O site do Codeforces é protegido pelo Cloudflare, e obviamente com os seus desafios
+        # de anti-bot, então se você fizer uma requisição simples, ele vai bloquear e retornar
+        # um erro 403. Então, para contornar isso, eu adicionei um User-Agent de um navegador
+        # e por incrível que pareça, funciona. Apliquei no curl, também. Mas eu que uso
+        # PowerShell, algo faz com que o .NET não funciona. Eu não entendo a natureza do Cloudflare.
 
-        # Eu entendo que isso é algo que não é ideal, pois o Cloudflare faz isso para evitar scrapping,
-        # mas note que o scrapping que eu faço não tem más intenções.
+        # Eu entendo que isso é algo que não é ideal, pois o Cloudflare faz isso para evitar
+        # scrapping, por exemplo, mas note que o scrapping que eu faço não tem más intenções.
         request_options={
             "headers": {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -50,6 +56,7 @@ provider.add_source(
     )
 )
 
+# Documento 'privacy' - Política de Privacidade do Codeforces
 provider.add_source(
     source=URLSource(
         document_id="privacy",
@@ -57,7 +64,7 @@ provider.add_source(
         transformers=[
             ContentHTMLTransformer(element="#pageContent"),
             HTML2MarkdownTransformer(
-                converter_cls=PrivacyNormalizer, 
+                converter_cls=PrivacyNormalizer,
                 converter_options={
                     "wrap": True
                 }
@@ -75,6 +82,7 @@ provider.add_source(
     )
 )
 
+# Documento 'disclaimer' - Avisos sobre o GPC
 provider.add_source(
     source=CacheSource(
         document_id="disclaimer",
@@ -86,6 +94,7 @@ provider.add_source(
 
 @router.get("/terms", response_class=PlainTextResponse)
 def get_terms():
+    """Endpoint para obter os Termos e Condições do Codeforces"""
     try:
         document = provider.fetch_document("terms")
 
@@ -95,6 +104,7 @@ def get_terms():
 
 @router.get("/privacy", response_class=PlainTextResponse)
 def get_privacy():
+    """Endpoint para obter a Política de Privacidade do Codeforces"""
     try:
         document = provider.fetch_document("privacy")
 
@@ -104,6 +114,7 @@ def get_privacy():
 
 @router.get("/disclaimer", response_class=PlainTextResponse)
 def get_disclaimer():
+    """Endpoint para obter os Avisos sobre o GPC"""
     try:
         document = provider.fetch_document("disclaimer")
 

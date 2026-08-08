@@ -1,3 +1,7 @@
+"""
+    Entrypoint do servidor
+"""
+
 from fastapi import FastAPI
 from api import docs
 
@@ -13,4 +17,5 @@ app.include_router(docs.router, prefix="/docs")
 
 @app.get("/health")
 def health_check():
+    """Endpoint de verificação de saúde do servidor"""
     return {"status": "ok"}

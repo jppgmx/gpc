@@ -1,9 +1,16 @@
+"""
+    Módulo para buscar documentos a partir de cache
+"""
+
 from models.document import Document, DocumentType
 from services.data_store import DataStore, FileDescriptor, TextIO
 from services.document_provider import DocumentSource
 
 DEFAULT_CACHE_LIFETIME = 3600  # 1 hora em segundos
 class CacheSource(DocumentSource):
+    """
+        Fonte de documentos a partir de cache (DataStore)
+    """
     def __init__(self, document_id: str, **kwargs):
         super().__init__(document_id, **kwargs)
         self.cached_file: FileDescriptor | None = kwargs.get("cached_file", None)
