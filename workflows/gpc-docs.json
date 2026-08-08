@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-06T20:03:54.172Z",
+  "updatedAt": "2026-08-07T23:43:05.593Z",
   "createdAt": "2026-08-04T14:07:49.693Z",
   "id": "rh0NzGjUX0KmOJns",
   "name": "gpc-docs",
@@ -13,7 +13,7 @@
       "typeVersion": 1,
       "position": [
         -432,
-        -48
+        48
       ],
       "id": "73806f4d-80b3-4141-ac03-b3743aaabb58",
       "name": "When clicking ‘Execute workflow’"
@@ -31,7 +31,7 @@
       "typeVersion": 1.3,
       "position": [
         48,
-        -48
+        48
       ],
       "id": "83fb051a-d39a-4d9d-97ee-cacc5bfd49a4",
       "name": "Simple Vector Store"
@@ -45,7 +45,7 @@
       "typeVersion": 1.1,
       "position": [
         152,
-        184
+        280
       ],
       "id": "4c4448b4-2f1a-4978-8444-03759d79a8dc",
       "name": "Default Data Loader"
@@ -58,7 +58,7 @@
       "typeVersion": 1,
       "position": [
         24,
-        184
+        280
       ],
       "id": "03460fbe-dd21-46ef-a663-e777c11e5c25",
       "name": "Embeddings Cohere",
@@ -99,17 +99,31 @@
     },
     {
       "parameters": {
-        "chunkSize": 500,
-        "chunkOverlap": 50
+        "chunkSize": 700,
+        "chunkOverlap": 100
       },
       "type": "@n8n/n8n-nodes-langchain.textSplitterCharacterTextSplitter",
       "typeVersion": 1,
       "position": [
         232,
-        392
+        488
       ],
       "id": "b3ce7d42-4b93-4e13-a789-6c25ad6b8c20",
       "name": "Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "url": "http://backend:8000/docs/disclaimer",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -208,
+        240
+      ],
+      "id": "ecdfbe8c-ddfc-46ee-957a-f5171ddfd316",
+      "name": "Disclaimer"
     }
   ],
   "connections": {
@@ -123,6 +137,11 @@
           },
           {
             "node": "Privacy",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Disclaimer",
             "type": "main",
             "index": 0
           }
@@ -183,6 +202,17 @@
           }
         ]
       ]
+    },
+    "Disclaimer": {
+      "main": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -196,9 +226,9 @@
   },
   "nodeGroups": [],
   "pinData": {},
-  "versionId": "065c5302-fef2-45db-9f38-df82febea253",
+  "versionId": "e2e1f200-268c-40cb-ad01-94e6e9cfeae8",
   "activeVersionId": null,
-  "versionCounter": 39,
+  "versionCounter": 47,
   "triggerCount": 0,
   "sourceWorkflowId": null,
   "tags": [],
