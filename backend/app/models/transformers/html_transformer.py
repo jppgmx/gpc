@@ -1,9 +1,17 @@
+"""
+    Módulo para transformar documentos HTML
+"""
+
 from typing import Callable, Union
 
 from models.document import Document, DocumentType
 from services.document_provider import Transformer
 
 class HTMLTransformer(Transformer):
+    """
+        Transformer base para documentos HTML
+    """
+
     @property
     def supports(self) -> list[DocumentType]:
         return [DocumentType.HTML]
@@ -14,6 +22,10 @@ class HTMLTransformer(Transformer):
 
 ElementSelector = Union[str, Callable[[Document], Document]]
 class ContentHTMLTransformer(HTMLTransformer):
+    """
+        Transformer para extrair o conteúdo de um documento HTML
+    """
+
     def transform(self, document: Document) -> Document:
         el: ElementSelector = self.transformer_config.get("element", "#pageContent")
 

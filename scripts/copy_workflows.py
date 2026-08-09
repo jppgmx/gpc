@@ -1,3 +1,8 @@
+"""
+    Copia arquivos JSON oriundos do n8n, tenta ler o campo "name" e renomear o arquivo de acordo com ele.
+    Ex.: EfGUhRGM7wMCYnyR.json (aka. gpc-agent) -> gpc-agent.json
+"""
+
 import os
 import json
 import re

@@ -1,3 +1,7 @@
+"""
+    Módulo para buscar documentos a partir de URLs
+"""
+
 import requests as req
 
 from bs4 import BeautifulSoup
@@ -10,6 +14,9 @@ DOCUMENT_LIFETIME = 3600  # 1 hora em segundos
 DEFAULT_TIMEOUT = 10  # 10 segundos
 
 class URLSource(CacheSource):
+    """
+        Fonte de documentos a partir de URLs
+    """
     def __init__(self, document_id: str, url: str, **kwargs):
         super().__init__(document_id, **kwargs)
         self.url = url
@@ -23,8 +30,8 @@ class URLSource(CacheSource):
             return document
 
         reqopts = {
-            "timeout": self.timeout,
-            **self.request_options
+            **self.request_options,
+            "timeout": self.timeout
         }
         # Se não tiver no cache, busca da URL
         response = req.get(self.url, **reqopts)
