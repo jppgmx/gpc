@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-08T00:56:43.099Z",
+  "updatedAt": "2026-08-13T14:54:40.296Z",
   "createdAt": "2026-08-03T18:38:26.827Z",
   "id": "EfGUhRGM7wMCYnyR",
   "name": "gpc-agent",
@@ -24,13 +24,13 @@
     {
       "parameters": {
         "options": {
-          "systemMessage": "Você é o GPC (Garoto de Programa Competitivo), um assistente de IA especializado em ajudar usuários a navegar a plataforma Codeforces.\n\nIdentidade e transparência:\n- Você NÃO é afiliado, endossado ou mantido pelo Codeforces. É um projeto pessoal e independente.\n- Na primeira mensagem de uma conversa nova, apresente-se brevemente e deixe claro que é um assistente não-oficial que pode cometer erros.\n- Se o usuário perguntar sobre sua natureza, afiliação, ou confiabilidade, use a informação do disclaimer para responder com transparência total.\n\nSeu escopo:\n- Explicar regras, diretrizes e FAQ da plataforma\n- Avisar sobre quaisquer mudanças no sistema da plataforma\n- Informar sobre calendário de contests\n- Ajudar a buscar problemas do banco de questões por rating/tag\n- Dar suporte a dúvidas de programação em C/C++\n\nRegras:\n- Se não souber algo com certeza, diga que não sabe em vez de inventar uma resposta\n- Para questões sobre termos de uso, política de privacidade ou regras oficiais, sempre recomende que o usuário confira a fonte oficial do Codeforces, já que você pode estar desatualizado\n- Respostas objetivas, sem enrolação\n- Responda sempre em português, a menos que o usuário escreva em outro idioma"
+          "systemMessage": "=Você é o GPC (Garoto de Programa Competitivo), um assistente de IA especializado em ajudar usuários a navegar a plataforma Codeforces.\n\nIdentidade e transparência:\n- Você NÃO é afiliado, endossado ou mantido pelo Codeforces. É um projeto pessoal e independente.\n- Na primeira mensagem de uma conversa nova, apresente-se brevemente e deixe claro que é um assistente não-oficial que pode cometer erros.\n- Se o usuário perguntar sobre sua natureza, afiliação, ou confiabilidade, use a informação do disclaimer para responder com transparência total.\n\nSeu escopo:\n- Explicar regras, diretrizes e FAQ da plataforma\n- Avisar sobre quaisquer mudanças no sistema da plataforma\n- Informar sobre calendário de contests\n- Ajudar a buscar problemas do banco de questões por rating/tag\n- Dar suporte a dúvidas de programação em C/C++\n\nRegras:\n- Se não souber algo com certeza, diga que não sabe em vez de inventar uma resposta\n- Para questões sobre termos de uso, política de privacidade ou regras oficiais, sempre recomende que o usuário confira a fonte oficial do Codeforces, já que você pode estar desatualizado\n- Respostas objetivas, sem enrolação\n- Responda sempre em português, a menos que o usuário escreva em outro idioma\n\nSobre documentos:\n- Os documentos do CodeForces podem estar no idioma inglês, então:\n  - Termos e Condições (ou Termos): \"Terms and Conditions\";\n  - Política de Privacidade: \"Privacy Policy\";\n\nSobre datas e eventos:\n- Ao interpretar perguntas sobre contests/eventos, assuma que o usuário se refere a eventos futuros ou em andamento, a menos que ele peça explicitamente por histórico ou eventos passados.\n- \"recente\", \"próximo\", \"que vem aí\" geralmente significam eventos futuros nesse contexto — não passados.\n- Ao fazer busca por nome/texto (q), evite adicionar filtro de data a menos que o usuário mencione um período específico.\n- Sempre diga a data/hora do evento, o fuso horário se necessário.\n- O limite de eventos a buscar é de, no mínimo, 1, no máximo, 100 eventos.\n- Dependendo da pesquisa, se tiver mais eventos do que o limite especificado, pergunta se quer continuar a pesquisa.\n- Você fazer até três tentativas para obter uma resposta em caso de erro, após isso, continua o trabalho mesmo assim.\n\nContexto:\n- Hoje é {{$now.format('yyyy-MM-dd')}}"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        144,
+        208,
         -32
       ],
       "id": "74300270-7109-4e27-b3a8-f1707331fe43",
@@ -68,40 +68,6 @@
     },
     {
       "parameters": {
-        "toolDescription": "Retorna o status atual do sistema do CodeForces. Use quando o usuário perguntar se a API/plataforma está no ar, funcionando sem nenhum problema e/ou instabilidade.",
-        "url": "https://codeforces.com/api/system.status",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequestTool",
-      "typeVersion": 4.4,
-      "position": [
-        288,
-        208
-      ],
-      "id": "65bcad99-fbd6-4dbb-b7c1-4b9990b72417",
-      "name": "HTTP Request"
-    },
-    {
-      "parameters": {
-        "mode": "retrieve-as-tool",
-        "toolDescription": "Use essa ferramenta para obter documentos relacionados a plataforma do CodeForces. Isso inclui:\n- Política de Privacidade\n- Termos e Condições",
-        "memoryKey": {
-          "__rl": true,
-          "value": "gpc_vs_documents",
-          "mode": "id"
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
-      "typeVersion": 1.3,
-      "position": [
-        416,
-        208
-      ],
-      "id": "a849f32d-cf0a-4896-8888-6cdd04092e43",
-      "name": "Simple Vector Store"
-    },
-    {
-      "parameters": {
         "modelName": "embed-multilingual-v3.0"
       },
       "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
@@ -118,6 +84,88 @@
           "name": "GPC-Agente-key"
         }
       }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Retorna o status atual do sistema do CodeForces. Use quando o usuário perguntar se a API/plataforma está no ar, funcionando sem nenhum problema e/ou instabilidade.",
+        "url": "https://codeforces.com/api/system.status",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        288,
+        208
+      ],
+      "id": "65bcad99-fbd6-4dbb-b7c1-4b9990b72417",
+      "name": "CF System Status"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Use essa ferramenta para obter documentos relacionados a plataforma do CodeForces entre outros. Isso inclui:\n- Política de Privacidade (Privacy Policy)\n- Termos e Condições (Terms and Conditions)\n- Aviso legal do agente",
+        "memoryKey": {
+          "__rl": true,
+          "value": "gpc_vs_documents",
+          "mode": "id"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        416,
+        208
+      ],
+      "id": "a849f32d-cf0a-4896-8888-6cdd04092e43",
+      "name": "Documents Vector Store"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Busca eventos do calendário de contests ou de streams/discussões do Codeforces. Use para responder perguntas sobre próximos contests, eventos em um período específico, ou busca por nome de contest/evento (ex: \"Huawei\", \"ICPC\").",
+        "url": "=http://backend:8000/api/calendar/{{ $fromAI(\"calendar_id\", \"primary para contests oficiais, misc para streams/discussões\", \"string\") }}/events",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $fromAI(\"q\", \"Termo de busca textual livre para filtrar eventos por nome/descrição\", \"string\") }}"
+            },
+            {
+              "name": "start",
+              "value": "={{ $fromAI(\"start\", \"Data de início do intervalo (RFC 3339). Deixe vazio se o usuário não mencionar um período específico — buscas por nome/texto (q) já cobrem todos os períodos automaticamente\", \"string\") }}"
+            },
+            {
+              "name": "end",
+              "value": "={{ $fromAI(\"end\", \"Data de término do intervalo (RFC 3339). Deixe vazio se o usuário não mencionar um período específico\", \"string\") }}"
+            },
+            {
+              "name": "order_by",
+              "value": "={{ $fromAI(\"order_by\", \"startTime para ordenar por data do evento, updated para última modificação\", \"string\") }}"
+            },
+            {
+              "name": "limit",
+              "value": "={{ $fromAI(\"limit\", \"Número máximo de eventos a retornar.\", \"number\") }}"
+            },
+            {
+              "name": "timezone",
+              "value": "America/Sao_Paulo"
+            },
+            {
+              "name": "page",
+              "value": "={{ $fromAI(\"page\", \"A página a procurar na pesquisa, caso haja mais itens acima do limite.\", \"number\") }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        704,
+        208
+      ],
+      "id": "c8e89c3f-e2b6-44b1-a5ef-94a81de3237f",
+      "name": "Calendar"
     }
   ],
   "connections": {
@@ -154,34 +202,45 @@
         ]
       ]
     },
-    "HTTP Request": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Simple Vector Store": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Embeddings Cohere": {
       "ai_embedding": [
         [
           {
-            "node": "Simple Vector Store",
+            "node": "Documents Vector Store",
             "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CF System Status": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Documents Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
             "index": 0
           }
         ]
@@ -199,9 +258,9 @@
   },
   "nodeGroups": [],
   "pinData": {},
-  "versionId": "0fa49743-d33b-403f-a338-84ebdd11be9f",
+  "versionId": "e15e04db-eb9a-4d4a-89d5-f5327b7f7649",
   "activeVersionId": null,
-  "versionCounter": 54,
+  "versionCounter": 195,
   "triggerCount": 0,
   "sourceWorkflowId": null,
   "tags": [],

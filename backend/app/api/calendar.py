@@ -2,10 +2,13 @@
     API de calendário.
 """
 
+from datetime import datetime
 from typing import Annotated, Optional
-from pydantic import BaseModel, Field, ConfigDict
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Query
+from pydantic import BaseModel, Field, ConfigDict
+
 from services.data_store import DataStore
 from services.secrets import get_google_credentials
 from services.calendar_provider import CalendarProvider
@@ -64,7 +67,19 @@ class FilterParams(BaseModel):
     timezone: Optional[str] = Field(None, description="Fuso horário para os eventos.")
     order_by: Optional[str] = Field(None, description="Campo pelo qual ordenar os eventos.")
     page: Optional[int] = Field(default=1, description="Número da página de resultados a ser retornada.")
-    limit: Optional[int] = Field(default=10, description="Número máximo de eventos a serem retornados.")
+    limit: Optional[int] = Field(default=10, ge=1, le=100, description="Número máximo de eventos a serem retornados.")
+
+def to_rfc3339(dt: str, timezone: ZoneInfo) -> str:
+    """
+        Converte um objeto datetime para o formato RFC 3339.
+    """
+    normalized_dt = dt.replace("Z", "+00:00")  # Normaliza o formato de fuso horário
+    dt_obj = datetime.fromisoformat(normalized_dt)
+
+    if dt_obj.tzinfo is None:
+        dt_obj = dt_obj.replace(tzinfo=timezone)
+
+    return dt_obj.isoformat()
 
 @router.get("/{calendar_id}/events")
 def get_calendar_events(calendar_id: str, params: Annotated[FilterParams, Query()]):
@@ -75,14 +90,15 @@ def get_calendar_events(calendar_id: str, params: Annotated[FilterParams, Query(
         return {"error": "Não é possível listar eventos de todos os calendários."}
 
     cal = calendar_provider.get_calendar(CALENDARS[calendar_id])
+    default_tz = ZoneInfo(cal.time_zone) if cal.time_zone else ZoneInfo("UTC")
     req = {}
 
     if params.q:
         req['q'] = params.q
     if params.start:
-        req['timeMin'] = params.start
+        req['timeMin'] = to_rfc3339(params.start, default_tz)
     if params.end:
-        req['timeMax'] = params.end
+        req['timeMax'] = to_rfc3339(params.end, default_tz)
     if params.timezone:
         req['timeZone'] = params.timezone
     if params.order_by:
