@@ -11,6 +11,7 @@ em programação competitiva.
 - Consulta o status do sistema do Codeforces em tempo real
 - Responde dúvidas sobre Termos de Uso e Política de Privacidade, usando busca
   semântica (RAG) sobre o conteúdo oficial
+- Consulta eventos da plataforma por meio da API do Google Calendar
 - Se apresenta com transparência: deixa claro que é um agente não-oficial e
   que pode errar
 
@@ -190,10 +191,13 @@ Docker relacionados ao projeto.
 ## Próximos passos
 
 - [ ] Consulta ao banco de questões por rating/tags e demais filtros
-- [ ] Calendário de contests usando Google Calendar API
+- [x] Calendário de contests usando Google Calendar API
 - [ ] FAQ, via API oficial e blogs do Codeforces
 - [ ] Suporte a dúvidas de programação em C/C++
-- [ ] Melhorar em relação ao modelo e RAG
+- [ ] Melhorar em relação ao modelo e RAG¹
+
+¹Com a adição do serviço de Calendário e o nodo ferramenta, venho tentando calibrar o uso da ferramenta,
+além de outras otimizações na parte do Vector Store.
 
 ## Contato
 
