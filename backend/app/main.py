@@ -3,7 +3,7 @@
 """
 
 from fastapi import FastAPI
-from api import docs
+from api import docs, calendar
 
 app = FastAPI(
     title="GPC Backend",
@@ -14,6 +14,7 @@ app = FastAPI(
     openapi_url=None
 )
 app.include_router(docs.router, prefix="/docs")
+app.include_router(calendar.router, prefix="/api")
 
 @app.get("/health")
 def health_check():

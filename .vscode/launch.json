@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "name": "FastAPI: Debug backend",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/backend/app",
+            "module": "uvicorn",
+            "args": [
+                "main:app",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "8000",
+                "--reload"
+            ],
+            "jinja": true,
+            "subProcess": true
+        }
+    ]
+}
