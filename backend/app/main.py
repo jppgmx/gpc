@@ -2,8 +2,21 @@
     Entrypoint do servidor
 """
 
+from asyncio import create_task
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from api import docs, calendar
+from services.worker import start_worker
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """ Gerencia o ciclo de vida do servidor """
+    
+    # Inicia o worker em segundo plano
+    task = create_task(start_worker())
+    yield
+    task.cancel()
 
 app = FastAPI(
     title="GPC Backend",
@@ -11,7 +24,8 @@ app = FastAPI(
     version="0.1.0",
     docs_url=None,
     redoc_url=None,
-    openapi_url=None
+    openapi_url=None,
+    lifespan=lifespan
 )
 app.include_router(docs.router, prefix="/docs")
 app.include_router(calendar.router, prefix="/api")

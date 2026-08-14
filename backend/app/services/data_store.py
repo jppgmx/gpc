@@ -60,6 +60,7 @@ class FileDescriptor:
         Descreve um arquivo dentro do DataStore, encapsulando seu caminho.
     """
     path: Path
+    relative_path: Path
 
 class DataStore:
     """
@@ -119,7 +120,8 @@ class DataStore:
         path = self.root.joinpath(*parts)
         self._ensure_dir_exists(path, True)
         return FileDescriptor(
-            path=path
+            path=path,
+            relative_path=path.relative_to(self.root)
         )
 
     def exists(self, descriptor: FileDescriptor) -> bool:
