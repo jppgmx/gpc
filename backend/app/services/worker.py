@@ -83,6 +83,7 @@ def sync_codeforces_problemset(session: Session):
     LOGGER.debug(f"Tags existentes no banco de dados: {list(existing_tags.keys())}")
 
     i = 1
+    LOGGER.info("Sincronizando problemas...")
     for problem in problemset_data['result']['problems']:
         key = (problem['contestId'], problem['index'])
         tags = []
@@ -149,6 +150,7 @@ def sync_codeforces_contests(session: Session):
     i = 1
 
     # 2. Montar lista de concursos
+    LOGGER.info("Sincronizando concursos...")
     for contest in contests_data['result']:
         LOGGER.debug(f"Processando concurso {i}/{total_contests}: {contest['name']} ID: {contest['id']}")
 
