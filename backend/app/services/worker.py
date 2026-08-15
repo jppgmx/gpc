@@ -1,3 +1,7 @@
+"""
+    Módulo do worker.
+"""
+
 from asyncio import sleep
 
 from requests import get
@@ -95,7 +99,7 @@ def sync_codeforces_problemset(session: Session):
 
 
 def sync_codeforces_contests(session: Session):
-    """ Busca a lista de concursos do Codeforces """
+    """ Sincroniza os concursos do Codeforces no banco de dados """
     # 0. Criar tabelas caso não existam
     cm.ContestsBase.metadata.create_all(session.get_bind())
 

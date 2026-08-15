@@ -1,3 +1,7 @@
+"""
+    API de contests
+"""
+
 from typing import Annotated, Optional, Literal, get_args
 
 from fastapi import APIRouter, Query

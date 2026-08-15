@@ -1,3 +1,7 @@
+"""
+    API de problemas
+"""
+
 from re import match
 from typing import Literal, Optional, Annotated, get_args
 

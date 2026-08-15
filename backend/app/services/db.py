@@ -1,3 +1,7 @@
+"""
+    Módulo do serviço de banco de dados.
+"""
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
