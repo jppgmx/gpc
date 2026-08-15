@@ -6,7 +6,7 @@ from asyncio import create_task
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from api import docs, calendar, problemset
+from api import docs, calendar, problemset, contests
 from services.worker import start_worker
 
 @asynccontextmanager
@@ -30,6 +30,7 @@ app = FastAPI(
 app.include_router(docs.router, prefix="/docs")
 app.include_router(calendar.router, prefix="/api")
 app.include_router(problemset.router, prefix="/api")
+app.include_router(contests.router, prefix="/api")
 
 @app.get("/health")
 def health_check():

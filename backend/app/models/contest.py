@@ -33,7 +33,7 @@
 
 import enum
 from typing import Optional
-from sqlalchemy import Text, Integer, Enum
+from sqlalchemy import Text, Integer, Enum, Boolean
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -66,7 +66,7 @@ class Contest(ContestsBase):
     name: Mapped[str] = mapped_column(Text)
     type: Mapped[ContestType] = mapped_column(Enum(ContestType))
     phase: Mapped[ContestPhase] = mapped_column(Enum(ContestPhase))
-    frozen: Mapped[bool]
+    frozen: Mapped[bool] = mapped_column(Boolean)
     duration_seconds: Mapped[int] = mapped_column("durationSeconds", Integer)
     freeze_duration_seconds: Mapped[Optional[int]] = mapped_column("freezeDurationSeconds", Integer, nullable=True)
     start_time_seconds: Mapped[Optional[int]] = mapped_column("startTimeSeconds", Integer, nullable=True)
