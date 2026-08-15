@@ -12,6 +12,7 @@ em programação competitiva.
 - Responde dúvidas sobre Termos de Uso e Política de Privacidade, usando busca
   semântica (RAG) sobre o conteúdo oficial
 - Consulta eventos da plataforma por meio da API do Google Calendar
+- Permite consultar problemas e contests da plataforma de forma avançada
 - Se apresenta com transparência: deixa claro que é um agente não-oficial e
   que pode errar
 
@@ -67,35 +68,84 @@ chat (local do n8n), com as seguintes ferramentas disponíveis:
 - Consulta de status do sistema Codeforces (`system.status`)
 - Busca semântica (RAG) sobre Termos, Privacidade e o aviso de transparência
   do próprio projeto
+- Consulta de eventos nos calendários da plataforma como a Programming Contests Calendar e
+  Misc Codeforces Calendar
+- Consulta dos problemas da paltaforma com suporte a pesquisa, ordenação e paginação.
+- Consulta detalhada das contests da plataforma, também com filtros avançados.
 
-### Fluxo de documentos (backend)
+### Fluxo de dados (backend)
 
-1. `terms` e `privacy` são buscados de `codeforces.com`.
+O agente possui diversas fontes de dados, porém, devido as limitações da plataforma em fornecer
+formas de pesquisa avançadas, inclusive, obter problemas de lá sempre retorna mais de 11 mil objetos,
+o backend pega esses dados, normaliza e cacheia.
+
+#### Documentos
+
+1. `terms` e `privacy` são buscados de `codeforces.com`, quando dispara API REST.
 2. O conteúdo HTML é filtrado e convertido para Markdown.
 3. O resultado é armazenado em cache dentro de `.data`.
 4. `disclaimer` é servido a partir de um arquivo local, sem busca externa.
+
+#### Problemas e contests
+
+1. Ao iniciar o servidor, um worker faz a sincronização em um certo intervalo.
+2. Consiste em pegar todos os problemas e contests.
+3. Normalizar usando os models do SQLAlchemy.
+4. Inserir e/ou atualizar no banco de dados.
 
 ## Estrutura do repositório
 
 ```text
 .
+├── backend
+│   ├── app
+│   │   ├── api
+│   │   │   ├── calendar.py
+│   │   │   ├── contests.py
+│   │   │   ├── docs.py
+│   │   │   └── problemset.py
+│   │   ├── models
+│   │   │   ├── mdconvs
+│   │   │   │   └── privacy.py
+│   │   │   ├── sources
+│   │   │   │   ├── cache.py
+│   │   │   │   └── url.py
+│   │   │   ├── transformers
+│   │   │   │   ├── callable.py
+│   │   │   │   ├── html_transformer.py
+│   │   │   │   └── markdown.py
+│   │   │   ├── calendar.py
+│   │   │   ├── contest.py
+│   │   │   ├── document.py
+│   │   │   ├── event.py
+│   │   │   ├── gapi.py
+│   │   │   └── problemset.py
+│   │   ├── services
+│   │   │   ├── calendar_provider.py
+│   │   │   ├── data_store.py
+│   │   │   ├── db.py
+│   │   │   ├── document_provider.py
+│   │   │   ├── secrets.py
+│   │   │   └── worker.py
+│   │   └── main.py
+│   ├── assets
+│   │   ├── docs
+│   │   │   ├── disclaimer.md
+│   │   │   ├── privacy.md
+│   │   │   └── terms.md
+│   │   └── README.md
+│   ├── Dockerfile
+│   ├── pyproject.toml
+│   ├── requirements.txt
+│   └── requirements-dev.txt
+├── scripts
+│   └── copy_workflows.py
+├── workflows
+│   ├── gpc-agent.json
+│   └── gpc-docs.json
 ├── docker-compose.yml
 ├── Makefile
-├── backend/
-│   ├── Dockerfile
-│   ├── requirements.txt
-│   ├── app/
-│   │   ├── main.py
-│   │   ├── api/docs.py
-│   │   ├── models/
-│   │   └── services/
-│   └── .data/
-│       └── docs/
-├── scripts/
-│   └── copy_workflows.py
-└── workflows/
-    ├── gpc-agent.json
-    └── gpc-docs.json
+└── README.md
 ```
 
 ## Pré-requisitos
@@ -117,6 +167,7 @@ Esse alvo:
 
 - cria o virtualenv em `backend/.venv`;
 - instala dependências de `backend/requirements.txt`;
+- instala dependências adicionais de `backend/requirements-dev.txt`
 - instala o backend em modo editável (`pip install -e .`).
 
 ## Executando com Docker
@@ -153,6 +204,24 @@ Base local esperada: `http://localhost:8000`
 - `GET /docs/terms` -> termos do Codeforces
 - `GET /docs/privacy` -> política de privacidade
 - `GET /docs/disclaimer` -> aviso local do projeto
+- `GET /api/calendar/primary` -> calendário "Programming Contests Calendar"
+- `GET /api/calendar/misc` -> calendário "Misc Codeforces Calendar"
+- `GET /api/calendar/all` -> todos os calendários
+- `GET /api/calendar/{calendário}/events` -> eventos do calendário especificado
+- `GET /api/problemset/problems` -> todos os problemas do Codeforces
+- `GET /api/problemset/problems/{¹id}` -> um problema do Codeforces
+- `GET /api/contests` -> todas as contests do Codeforces
+- `GET /api/contests/{²id}` -> uma contest (ou concurso, se traduzir literalmente) do Codeforces
+
+¹O ID de um problema é composto por duas partes:
+  - ID da Contest: Um valor numérico como 4, 2251 etc.
+  - Índice: Uma composição de letra e número para:
+    - Indicar a posição naquela contest, como A, B, C...
+    - Indicar a variação daquele problema.
+    Por exemplo: A (primeiro problema), C2 (segunda variante do terceiro problema).
+  - Com isso temos IDs como 4A, 2255E1, 1169B etc.
+
+²O ID da contest é numérico, como descrito acima.
 
 ## Workflows do n8n
 
@@ -184,17 +253,20 @@ Docker relacionados ao projeto.
 - Se `terms/privacy` falharem, valide conectividade e possíveis bloqueios
   externos.
 - O backend depende de resposta HTTP do Codeforces para atualização desses
-  docs.
+  documentos e demais dados.
 - Em ambientes MSYS2 no Windows, há tratamento no `Makefile` para conversão
   de paths no export de workflows.
 
 ## Próximos passos
 
-- [ ] Consulta ao banco de questões por rating/tags e demais filtros
+- [x] Consulta ao banco de questões por rating/tags e demais filtros
+- [x] Consulta as contests
 - [x] Calendário de contests usando Google Calendar API
+- [ ] Adicionar logging para o backend
+- [ ] Melhorar em relação ao modelo e RAG¹
+- [ ] Busca de enunciados de cada problema
 - [ ] FAQ, via API oficial e blogs do Codeforces
 - [ ] Suporte a dúvidas de programação em C/C++
-- [ ] Melhorar em relação ao modelo e RAG¹
 
 ¹Com a adição do serviço de Calendário e o nodo ferramenta, venho tentando calibrar o uso da ferramenta,
 além de outras otimizações na parte do Vector Store.
