@@ -90,6 +90,16 @@ clean:
 	docker compose down -v --remove-orphans
 	docker system prune -f
 
+# Atalho para atualizar a árvore do leia-me do projeto
+tree:
+	@tree --dirsfirst --noreport \
+		-I .vscode \
+		-I .venv \
+		-I __pycache__ \
+		-I __init__.py \
+		-I gpc_backend.egg-info \
+		.
+
 # Cria venv caso não exista
 $(VENV_DIR):
 	$(PYTHON) -m venv $(VENV_DIR)

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-13T17:16:37.268Z",
+  "updatedAt": "2026-08-15T12:47:41.125Z",
   "createdAt": "2026-08-03T18:38:26.827Z",
   "id": "EfGUhRGM7wMCYnyR",
   "name": "gpc-agent",
@@ -20,21 +20,6 @@
       "id": "debb56ab-bb1d-490c-b594-57d1170afeb3",
       "name": "When chat message received",
       "webhookId": "b099730b-5a82-4aa3-acb5-7433672498d8"
-    },
-    {
-      "parameters": {
-        "options": {
-          "systemMessage": "=Você é o GPC (Garoto de Programa Competitivo), um assistente de IA especializado em ajudar usuários a navegar a plataforma Codeforces.\n\nIdentidade e transparência:\n- Você NÃO é afiliado, endossado ou mantido pelo Codeforces. É um projeto pessoal e independente.\n- Na primeira mensagem de uma conversa nova, apresente-se brevemente e deixe claro que é um assistente não-oficial que pode cometer erros.\n- Se o usuário perguntar sobre sua natureza, afiliação, ou confiabilidade, use a informação do disclaimer para responder com transparência total.\n\nSeu escopo:\n- Explicar regras, diretrizes e FAQ da plataforma\n- Avisar sobre quaisquer mudanças no sistema da plataforma\n- Informar sobre calendário de contests\n- Ajudar a buscar problemas do banco de questões por rating/tag\n- Dar suporte a dúvidas de programação em C/C++\n\nRegras:\n- Se não souber algo com certeza, diga que não sabe em vez de inventar uma resposta\n- Para questões sobre termos de uso, política de privacidade ou regras oficiais, sempre recomende que o usuário confira a fonte oficial do Codeforces, já que você pode estar desatualizado\n- Respostas objetivas, sem enrolação\n- Responda sempre em português, a menos que o usuário escreva em outro idioma\n\nSobre documentos:\n- Os documentos do CodeForces podem estar no idioma inglês, então:\n  - Termos e Condições (ou Termos): \"Terms and Conditions\";\n  - Política de Privacidade: \"Privacy Policy\";\n\nSobre datas e eventos:\n- Ao interpretar perguntas sobre contests/eventos, assuma que o usuário se refere a eventos futuros ou em andamento, a menos que ele peça explicitamente por histórico ou eventos passados.\n- \"recente\", \"próximo\", \"que vem aí\" geralmente significam eventos futuros nesse contexto — não passados.\n- Ao fazer busca por nome/texto (q), evite adicionar filtro de data a menos que o usuário mencione um período específico.\n- Sempre diga a data/hora do evento, o fuso horário se necessário.\n- O limite de eventos a buscar é de, no mínimo, 1, no máximo, 100 eventos.\n- Dependendo da pesquisa, se tiver mais eventos do que o limite especificado, pergunta se quer continuar a pesquisa.\n- Você pode fazer até três tentativas para obter uma resposta em caso de erro, após isso, continua o trabalho mesmo assim.\n\nContexto:\n- Hoje é {{$now.format('yyyy-MM-dd')}}"
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 3.1,
-      "position": [
-        208,
-        -32
-      ],
-      "id": "74300270-7109-4e27-b3a8-f1707331fe43",
-      "name": "AI Agent"
     },
     {
       "parameters": {
@@ -166,6 +151,129 @@
       ],
       "id": "c8e89c3f-e2b6-44b1-a5ef-94a81de3237f",
       "name": "Calendar"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Busca por problemas do Codeforces.",
+        "url": "=http://backend:8000/api/problemset/problems{{ $fromAI(\"problemId\", \"Caso o usuário deseja uma questão específica, passe o ID do problema na URL, sem passar no query params, passe com / como prefixo.\", \"string\") }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $fromAI(\"q\", \"O termo de pesquisa.\", \"string\") }}"
+            },
+            {
+              "name": "contest_id",
+              "value": "={{ $fromAI(\"contest_id\", \"Permite procurar um conjunto de questões de uma contest.\", \"number\") }}"
+            },
+            {
+              "name": "index",
+              "value": "={{ $fromAI(\"index\", \"Permite procurar por índice (ex.: A, B, C, D1, D2, etc.). Se usar índice junto com o id da contest, equivale a /problems/{contestId+index}\", \"string\") }}"
+            },
+            {
+              "name": "rating",
+              "value": "={{ $fromAI(\"rating\", \"O rating do problema para pesquisa.\", \"number\") }}"
+            },
+            {
+              "name": "min_points",
+              "value": "={{ $fromAI(\"min_points\", \"Pesquisar pela quantidade mínima de pontos que dá para conseguir. Pode ser ponto flutuante.\", \"number\") }}"
+            },
+            {
+              "name": "tags",
+              "value": "={{ $fromAI(\"tags\", \"Lista de tags do problema separados por vírgula. (Ex.: implementation,brute force)\") }}"
+            },
+            {
+              "name": "order_by",
+              "value": "={{ $fromAI(\"order_by\", \"Lista de campos para ordenar separados por vírgula, pode ser 'contestId', 'index', 'solvedCount', 'rating', 'points', 'name'. Use o prefixo - em um campo para tornar decrescente. A ordem importa. (Ex1.: contestId,index; Ex2.: -solvedCount)\", \"string\") }}"
+            },
+            {
+              "name": "limit",
+              "value": "={{ $fromAI(\"limit\", \"O limite de problemas a retornar. Min.: 1, Max.: 100, Padrão: 10\", \"number\") }}"
+            },
+            {
+              "name": "page",
+              "value": "={{ $fromAI(\"page\", \"Use quando tiver mais itens e o usuário queira continuar a pesquisa.\", \"number\") }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        832,
+        208
+      ],
+      "id": "cf7a0d71-f754-42e3-9840-10ef5c5845df",
+      "name": "Problemset"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Busca por contests do Codeforces de forma detalhada, podendo atuar em conjunto com o a ferramenta de Calendário para uma pesquisa mais ampla. Se estiver pesquisando uma contest específca, passe o ID na URL, e não passe query params a mais.",
+        "url": "=http://backend:8000/api/contests/{{ $fromAI(\"contestId\", \"Caso o usuário procure uma contest específica, passe na URL o ID dela.\", \"number\") }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "pretty_datetime",
+              "value": "true"
+            },
+            {
+              "name": "timezone",
+              "value": "America/Sao_Paulo"
+            },
+            {
+              "name": "q",
+              "value": "={{ $fromAI(\"q\", \"Procura contests pelo nome.\", \"string\") }}"
+            },
+            {
+              "name": "type",
+              "value": "={{ $fromAI(\"type\", \"Filtra pelo tipo da contest: CF, IOI, ICPC.\", \"string\") }}"
+            },
+            {
+              "name": "phase",
+              "value": "={{ $fromAI(\"phase\", \"Pesquisa pela fase atual da contest: BEFORE, CODING, PENDING_SYSTEM_TEST, SYSTEM_TEST, FINISHED\", \"string\") }}"
+            },
+            {
+              "name": "order_by",
+              "value": "={{ $fromAI(\"order_by\", \"Ordena por campo: id. Use o prefixo - para inverter a ordenação.\") }}"
+            },
+            {
+              "name": "limit",
+              "value": "={{ $fromAI(\"limit\", \"O limite de contests a retornar. Min.: 1, Max.: 100, Padrão: 10\", \"number\") }}"
+            },
+            {
+              "name": "page",
+              "value": "={{ $fromAI(\"page\", \"Use quando tiver mais itens e o usuário queira continuar a pesquisa.\", \"number\") }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        960,
+        208
+      ],
+      "id": "0658348a-f70b-414b-bb19-1afdc4407092",
+      "name": "Contests"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=Você é o GPC (Garoto de Programa Competitivo), um assistente de IA especializado em ajudar usuários a navegar a plataforma Codeforces.\n\nIdentidade e transparência:\n- Você NÃO é afiliado, endossado ou mantido pelo Codeforces. É um projeto pessoal e independente.\n- Na primeira mensagem de uma conversa nova, apresente-se brevemente e deixe claro que é um assistente não-oficial que pode cometer erros.\n- Se o usuário perguntar sobre sua natureza, afiliação, ou confiabilidade, use a informação do disclaimer para responder com transparência total.\n\nSeu escopo:\n- Explicar regras, diretrizes e FAQ da plataforma\n- Avisar sobre quaisquer mudanças no sistema da plataforma\n- Informar sobre calendário de contests\n- Ajudar a buscar problemas do banco de questões por rating/tag\n- Dar suporte a dúvidas de programação em C/C++\n\nRegras:\n- Se não souber algo com certeza, diga que não sabe em vez de inventar uma resposta\n- Para questões sobre termos de uso, política de privacidade ou regras oficiais, sempre recomende que o usuário confira a fonte oficial do Codeforces, já que você pode estar desatualizado\n- Respostas objetivas, sem enrolação\n- Responda sempre em português, a menos que o usuário escreva em outro idioma\n\nSobre documentos:\n- Os documentos do CodeForces podem estar no idioma inglês, então:\n  - Termos e Condições (ou Termos): \"Terms and Conditions\";\n  - Política de Privacidade: \"Privacy Policy\";\n\nSobre datas e eventos:\n- Ao interpretar perguntas sobre contests/eventos, assuma que o usuário se refere a eventos futuros ou em andamento, a menos que ele peça explicitamente por histórico ou eventos passados.\n- \"recente\", \"próximo\", \"que vem aí\" geralmente significam eventos futuros nesse contexto — não passados.\n- Ao fazer busca por nome/texto (q), evite adicionar filtro de data a menos que o usuário mencione um período específico.\n- Sempre diga a data/hora do evento, o fuso horário se necessário.\n- O limite de eventos a buscar é de, no mínimo, 1, no máximo, 100 eventos.\n- Dependendo da pesquisa, se tiver mais eventos do que o limite especificado, pergunta se quer continuar a pesquisa.\n- Você pode fazer até três tentativas para obter uma resposta em caso de erro, após isso, continua o trabalho mesmo assim.\n\nSobre problemas e contests:\n- Um ID de um problema é formado pelo ID da contest, em geral, numérico, e o índice do problema, composto por letra e um número para indicar variante, situado naquela contest. - Por exemplo: 4A, a ID da contest é a 4 e o índice é A; 2255E1, a ID da contest é a 2255 e o índice é E1, note que 1 indica que é, em geral, uma variante fácil, 2 indica uma variante difícil.\n- É possível que no calendário a descrição de um evento, no caso, contests, possuem um link https://codeforces.com/contests/ID onde ID é o ID da contest, você pode usar o Calendário como ua tentativa de procurar o evento que possui um link com esse ID.\n- Por exemplo: https://codeforces.com/contests/2257\n- Para contests, você possui duas ferramentas para isso, sempre que possível, use as em conjunto para pesquisa de forma ampla, pois uma pode indicar eventos, data/hora e a outra status como não iniciado, inicidado, terminado etc.\n\nContexto:\n- Hoje é {{$now.format('yyyy-MM-dd')}}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        -32
+      ],
+      "id": "74300270-7109-4e27-b3a8-f1707331fe43",
+      "name": "Garoto"
     }
   ],
   "connections": {
@@ -173,7 +281,7 @@
       "main": [
         [
           {
-            "node": "AI Agent",
+            "node": "Garoto",
             "type": "main",
             "index": 0
           }
@@ -184,7 +292,7 @@
       "ai_languageModel": [
         [
           {
-            "node": "AI Agent",
+            "node": "Garoto",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -195,7 +303,7 @@
       "ai_memory": [
         [
           {
-            "node": "AI Agent",
+            "node": "Garoto",
             "type": "ai_memory",
             "index": 0
           }
@@ -217,7 +325,7 @@
       "ai_tool": [
         [
           {
-            "node": "AI Agent",
+            "node": "Garoto",
             "type": "ai_tool",
             "index": 0
           }
@@ -228,7 +336,7 @@
       "ai_tool": [
         [
           {
-            "node": "AI Agent",
+            "node": "Garoto",
             "type": "ai_tool",
             "index": 0
           }
@@ -239,7 +347,29 @@
       "ai_tool": [
         [
           {
-            "node": "AI Agent",
+            "node": "Garoto",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Problemset": {
+      "ai_tool": [
+        [
+          {
+            "node": "Garoto",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contests": {
+      "ai_tool": [
+        [
+          {
+            "node": "Garoto",
             "type": "ai_tool",
             "index": 0
           }
@@ -258,9 +388,9 @@
   },
   "nodeGroups": [],
   "pinData": {},
-  "versionId": "6270a0f5-f3e1-49dd-b778-0f5f552a6b97",
+  "versionId": "2012b9a7-8ec7-480d-8aa4-22fb9ac2645e",
   "activeVersionId": null,
-  "versionCounter": 196,
+  "versionCounter": 591,
   "triggerCount": 0,
   "sourceWorkflowId": null,
   "tags": [],
