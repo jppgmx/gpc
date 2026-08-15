@@ -31,7 +31,7 @@ async def start_worker(**kwargs):
         except Exception as e:
             LOGGER.exception("Erro durante a execução do worker.")
         await sleep(DEFAULT_INTERVAL)
-        LOGGER.debug(f"Retomando...")
+        LOGGER.info(f"Retomando...")
 
 async def worker_loop(**kwargs):
     """ Loop do worker """
