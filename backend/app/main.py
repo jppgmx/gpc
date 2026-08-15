@@ -4,6 +4,7 @@
 
 from asyncio import create_task
 from contextlib import asynccontextmanager
+import psutil
 
 from fastapi import FastAPI
 
@@ -41,5 +42,12 @@ app.include_router(contests.router, prefix="/api")
 
 @app.get("/health")
 def health_check():
-    """Endpoint de verificação de saúde do servidor"""
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "cpu_percent": psutil.cpu_percent(interval=0.1),
+        "memory": {
+            "used_mb": round(psutil.virtual_memory().used / (1024 * 1024), 1),
+            "total_mb": round(psutil.virtual_memory().total / (1024 * 1024), 1),
+            "percent": psutil.virtual_memory().percent,
+        },
+    }
