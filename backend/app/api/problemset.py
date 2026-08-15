@@ -36,7 +36,7 @@ class FilterParams(BaseModel):
         None,
         description="Rating do problema",
     )
-    min_points: Optional[int] = Field(
+    min_points: Optional[float] = Field(
         None,
         description="Número mínimo de pontos do problema",
     )
