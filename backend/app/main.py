@@ -6,13 +6,20 @@ from asyncio import create_task
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+
 from api import docs, calendar, problemset, contests
+from services.data_store import DataStore
+from services.logging import setup_logging
 from services.worker import start_worker
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """ Gerencia o ciclo de vida do servidor """
     
+    # Configura o logging
+    store = DataStore()
+    setup_logging(store)
+
     # Inicia o worker em segundo plano
     task = create_task(start_worker())
     yield

@@ -2,11 +2,15 @@
     Módulo do serviço de banco de dados.
 """
 
-from sqlalchemy import create_engine
+from logging import getLogger
+
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
 from services.data_store import DataStore
 from services.secrets import get_env_variable
+
+LOGGER = getLogger(__name__)
 
 def get_default_url() -> str:
     """
@@ -20,6 +24,15 @@ def get_default_url() -> str:
 
 DATABASE_URL = get_env_variable("DATABASE_URL", get_default_url())
 engine = create_engine(DATABASE_URL)
+
+@event.listens_for(engine, "connect")
+def enable_wal(dbapi_connection, connection_record):
+    if engine.dialect.name == "sqlite":
+        LOGGER.debug("Habilitando o modo WAL no SQLite...")
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA synchronous=NORMAL")
+        cursor.close()
 
 def get_db_session() -> Session:
     """

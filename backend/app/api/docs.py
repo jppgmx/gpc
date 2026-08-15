@@ -2,6 +2,8 @@
     API de documentos
 """
 
+from logging import getLogger
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import PlainTextResponse
 
@@ -16,6 +18,7 @@ from models.mdconvs.privacy import PrivacyNormalizer
 router = APIRouter()
 data_store = DataStore()
 provider = DocumentProvider(data_store=data_store)
+LOGGER = getLogger(__name__)
 
 data_store.allocate_dir("docs")
 
@@ -95,6 +98,8 @@ provider.add_source(
 @router.get("/terms", response_class=PlainTextResponse)
 def get_terms():
     """Endpoint para obter os Termos e Condições do Codeforces"""
+    LOGGER.debug("Recebida requisição em /terms com parâmetros: {}")
+
     try:
         document = provider.fetch_document("terms")
 
@@ -105,6 +110,8 @@ def get_terms():
 @router.get("/privacy", response_class=PlainTextResponse)
 def get_privacy():
     """Endpoint para obter a Política de Privacidade do Codeforces"""
+    LOGGER.debug("Recebida requisição em /privacy com parâmetros: {}")
+
     try:
         document = provider.fetch_document("privacy")
 
@@ -115,6 +122,8 @@ def get_privacy():
 @router.get("/disclaimer", response_class=PlainTextResponse)
 def get_disclaimer():
     """Endpoint para obter os Avisos sobre o GPC"""
+    LOGGER.debug("Recebida requisição em /disclaimer com parâmetros: {}")
+
     try:
         document = provider.fetch_document("disclaimer")
 
