@@ -12,7 +12,7 @@ router = APIRouter(prefix="/contests", tags=["Contests"])
 class BasicOptions(BaseModel):
     """ Opções básicas para a listagem e obtenção de concursos """
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="ignore")
 
     pretty_datetime: Optional[bool] = Field(
         False,
@@ -29,6 +29,8 @@ class BasicOptions(BaseModel):
 type Order = Literal["id"]
 class FilterParams(BasicOptions):
     """ Parâmetros de filtro para a listagem de concursos """
+
+    model_config = ConfigDict(extra="forbid")
 
     q: Optional[str] = Field(
         None,
