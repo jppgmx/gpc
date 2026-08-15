@@ -33,6 +33,14 @@ setup: $(VENV_DIR)
 	$(ACTIVATE) && $(PIP) install -r backend/requirements-dev.txt
 	$(ACTIVATE) && cd backend && $(PIP) install -e .
 
+HOST := 0.0.0.0
+PORT := 8000
+UVICORN := $(PYTHON) -m uvicorn
+
+# Roda o servidor sem contêiner
+server:
+	@$(ACTIVATE) && cd backend/app && $(UVICORN) main:app --reload --host $(HOST) --port $(PORT)
+
 # Roda pylint
 pylint:
 	$(ACTIVATE) && pylint backend/app

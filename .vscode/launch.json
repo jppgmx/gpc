@@ -15,7 +15,10 @@
                 "--reload"
             ],
             "jinja": true,
-            "subProcess": true
+            "subProcess": true,
+            "env": {
+                "LOG_LEVEL": "DEBUG"
+            }
         }
     ]
 }
