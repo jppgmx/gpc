@@ -15,6 +15,8 @@ router = APIRouter(prefix="/problemset", tags=["Problemset"])
 type Order = Literal["contestId", "index", "solvedCount", "rating", "points", "name"]
 
 class FilterParams(BaseModel):
+    """ Parâmetros de filtro para a listagem de problemas """
+
     model_config = ConfigDict(extra="forbid")
 
     q: Optional[str] = Field(
@@ -125,6 +127,8 @@ class FilterParams(BaseModel):
         return v
 
 class ProblemResponse(BaseModel):
+    """ Resposta para a listagem de problemas """
+
     model_config = ConfigDict(extra="allow")
 
     total: int
@@ -134,6 +138,7 @@ class ProblemResponse(BaseModel):
 
 EMPTY_RESPONSE = ProblemResponse(total=0, page=1, limit=10, problems=[])
 def single(problem: Problem) -> ProblemResponse:
+    """ Retorna uma resposta com apenas um problema """
     return ProblemResponse(total=1, page=1, limit=1, problems=[to_dict(problem)])
 
 def is_valid_page(page: int, limit: int, total: int) -> bool:
@@ -142,6 +147,10 @@ def is_valid_page(page: int, limit: int, total: int) -> bool:
 
 @router.get("/problems")
 def get_problems(filter: Annotated[FilterParams, Query()]):
+    """
+        Retorna uma lista de problemas com base nos filtros fornecidos.
+    """
+
     with get_db_session() as session:
         query = session.query(Problem)
 
@@ -227,6 +236,8 @@ def get_problem(problem_id: Annotated[str, Field(pattern=PROBLEM_ID_REGEX)]):
     return result
 
 def to_dict(problem: Problem) -> dict:
+    """ Converte um objeto Problem em um dicionário """
+
     result = {}
 
     result['contestId'] = problem.contest_id
