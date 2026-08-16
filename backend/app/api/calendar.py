@@ -3,6 +3,7 @@
 """
 
 from datetime import datetime
+from logging import getLogger
 from typing import Annotated, Optional
 from zoneinfo import ZoneInfo
 
@@ -17,6 +18,7 @@ router = APIRouter(prefix="/calendar")
 calendar_provider = CalendarProvider(get_google_credentials(
     DataStore().allocate_file("secrets/gcalendar.json").path
 ))
+LOGGER = getLogger(__name__)
 
 # Esses calendários foram extraídos do iframe da página Calendar do Codeforces.
 CALENDARS = {
@@ -38,6 +40,8 @@ def get_calendar(calendar_id: str):
     """
         Retorna informações sobre um calendário específico.
     """
+
+    LOGGER.debug(f"Recebida requisição em /calendar/{calendar_id} com parâmetros: {{'calendar_id': '{calendar_id}'}}")
 
     if not calendar_id in CALENDARS:
         return {"error": "Calendário não encontrado."}
@@ -86,6 +90,8 @@ def get_calendar_events(calendar_id: str, params: Annotated[FilterParams, Query(
     """
         Retorna uma lista de eventos de um calendário específico, com suporte a filtros e paginação.
     """
+    LOGGER.debug(f"Recebida requisição em /calendar/{calendar_id}/events com parâmetros: {params.model_dump()}")
+
     if calendar_id == "all":
         return {"error": "Não é possível listar eventos de todos os calendários."}
 

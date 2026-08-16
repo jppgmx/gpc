@@ -2,6 +2,7 @@
     API de problemas
 """
 
+from logging import getLogger
 from re import match
 from typing import Literal, Optional, Annotated, get_args
 
@@ -15,6 +16,7 @@ from models.problemset import Problem
 PROBLEM_ID_REGEX = r"^(?P<contest>[0-9]+)(?P<problem>[A-Z][0-9]?)$"
 
 router = APIRouter(prefix="/problemset", tags=["Problemset"])
+LOGGER = getLogger(__name__)
 
 type Order = Literal["contestId", "index", "solvedCount", "rating", "points", "name"]
 
@@ -155,6 +157,8 @@ def get_problems(filter: Annotated[FilterParams, Query()]):
         Retorna uma lista de problemas com base nos filtros fornecidos.
     """
 
+    LOGGER.debug(f"Recebida requisição em /problemset/problems com parâmetros: {filter.model_dump()}")
+
     with get_db_session() as session:
         query = session.query(Problem)
 
@@ -224,6 +228,8 @@ def get_problem(problem_id: Annotated[str, Field(pattern=PROBLEM_ID_REGEX)]):
     """
         Retorna informações sobre um problema específico.
     """
+
+    LOGGER.debug(f"Recebida requisição em /problemset/problems/{problem_id} com parâmetros: {{'problem_id': '{problem_id}'}}")
 
     contest_id, problem_index = match(PROBLEM_ID_REGEX, problem_id).groups()
     result = {}

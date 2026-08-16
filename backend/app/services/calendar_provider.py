@@ -2,11 +2,16 @@
     Módulo com abstrações do serviço calendar do Google e serviço CalendarProvider.
 """
 
+from logging import getLogger
+
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
+from services.logging import start_chronometer as chrono
 from models.gapi import GoogleService
 from models import calendar, event
+
+LOGGER = getLogger(__name__)
 
 class _GoogleCalendarV3Service(GoogleService):
     """
@@ -47,7 +52,11 @@ class CalendarProvider:
         """
             Retorna informações sobre um calendário específico.
         """
-        return self.service.calendars().get(calendarId=calendar_id).execute()
+        start = chrono()
+        LOGGER.debug(f"Buscando informações do calendário {calendar_id}...")
+        result = self.service.calendars().get(calendarId=calendar_id).execute()
+        LOGGER.debug(f"Informações do calendário {calendar_id} obtidas em {start().total_seconds():.2f} segundos.")
+        return result
 
     def list_events(self, calendar: calendar.Calendar, **kwargs) -> event.EventList:
         """
@@ -61,4 +70,8 @@ class CalendarProvider:
                 Consulte a documentação da Google Calendar API v3 para detalhes sobre os parâmetros
                 aceitos pela API, como timeMin, timeMax, maxResults, etc.
         """
-        return self.service.events().list(calendarId=calendar.id, **kwargs).execute()
+        start = chrono()
+        LOGGER.debug(f"Listando eventos do calendário {calendar.id}...")
+        result = self.service.events().list(calendarId=calendar.id, **kwargs).execute()
+        LOGGER.debug(f"Eventos do calendário {calendar.id} obtidos em {start().total_seconds():.2f} segundos.")
+        return result

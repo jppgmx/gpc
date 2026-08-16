@@ -2,6 +2,7 @@
     API de contests
 """
 
+from logging import getLogger
 from typing import Annotated, Optional, Literal, get_args
 
 from fastapi import APIRouter, Query
@@ -12,6 +13,7 @@ from services.secrets import get_google_credentials
 from models.contest import Contest, ContestType, ContestPhase
 
 router = APIRouter(prefix="/contests", tags=["Contests"])
+LOGGER = getLogger(__name__)
 
 class BasicOptions(BaseModel):
     """ Opções básicas para a listagem e obtenção de concursos """
@@ -106,6 +108,8 @@ def get_contests(params: Annotated[FilterParams, Query()]):
     """
         Retorna uma lista de concursos com base nos filtros fornecidos.
     """
+    LOGGER.debug(f"Recebida requisição em /contests com parâmetros: {params.model_dump()}")
+
     with get_db_session() as session:
         query = session.query(Contest)
 
@@ -167,6 +171,8 @@ def get_contests(params: Annotated[FilterParams, Query()]):
 
 @router.get("/{contest_id}")
 def get_contest(contest_id: int, options: Annotated[BasicOptions, Query()]):
+    LOGGER.debug(f"Recebida requisição em /contests/{contest_id} com parâmetros: {options.model_dump()}")
+
     with get_db_session() as session:
         contest = session.query(Contest).filter(Contest.id == contest_id).first()
         if not contest:
