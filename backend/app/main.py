@@ -14,9 +14,9 @@ from services.logging import setup_logging
 from services.worker import start_worker
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_: FastAPI):
     """ Gerencia o ciclo de vida do servidor """
-    
+
     # Configura o logging
     store = DataStore()
     setup_logging(store)
@@ -42,6 +42,8 @@ app.include_router(contests.router, prefix="/api")
 
 @app.get("/health")
 def health_check():
+    """ Endpoint para checagem de saúde do servidor """
+
     return {
         "status": "ok",
         "cpu_percent": psutil.cpu_percent(interval=0.1),

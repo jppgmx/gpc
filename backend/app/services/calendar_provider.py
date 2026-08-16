@@ -53,9 +53,12 @@ class CalendarProvider:
             Retorna informações sobre um calendário específico.
         """
         start = chrono()
-        LOGGER.debug(f"Buscando informações do calendário {calendar_id}...")
+        LOGGER.debug("Buscando informações do calendário %s...", calendar_id)
         result = self.service.calendars().get(calendarId=calendar_id).execute()
-        LOGGER.debug(f"Informações do calendário {calendar_id} obtidas em {start().total_seconds():.2f} segundos.")
+        LOGGER.debug(
+            "Informações do calendário %s obtidas em %f segundos.", 
+            calendar_id, start().total_seconds()
+        )
         return result
 
     def list_events(self, calendar: calendar.Calendar, **kwargs) -> event.EventList:
@@ -71,7 +74,10 @@ class CalendarProvider:
                 aceitos pela API, como timeMin, timeMax, maxResults, etc.
         """
         start = chrono()
-        LOGGER.debug(f"Listando eventos do calendário {calendar.id}...")
+        LOGGER.debug("Listando eventos do calendário %s...", calendar.id)
         result = self.service.events().list(calendarId=calendar.id, **kwargs).execute()
-        LOGGER.debug(f"Eventos do calendário {calendar.id} obtidos em {start().total_seconds():.2f} segundos.")
+        LOGGER.debug(
+            "Eventos do calendário %s obtidos em %f segundos.",
+            calendar.id, start().total_seconds()
+        )
         return result

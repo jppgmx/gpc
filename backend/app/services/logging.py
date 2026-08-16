@@ -38,7 +38,9 @@ def setup_logging(store: DataStore, log_file: str = "gpc.log",
         backupCount=kwargs.get("backup_count", DEFAULT_LOG_BACKUP_COUNT),
         encoding="utf-8"
     )
-    rotating_handler.setFormatter(logging.Formatter("%(asctime)s | %(name)s | %(levelname)s | %(message)s"))
+    rotating_handler.setFormatter(
+        logging.Formatter("%(asctime)s | %(name)s | %(levelname)s | %(message)s")
+    )
 
     # O console
     console_handler = logging.StreamHandler()
@@ -50,12 +52,13 @@ def setup_logging(store: DataStore, log_file: str = "gpc.log",
     root_logger.addHandler(rotating_handler)
     root_logger.addHandler(console_handler)
 
-    # O uvicorn tem seus próprios handlers, então limpamos os handlers de seus loggers para evitar duplicação de logs
+    # O uvicorn tem seus próprios handlers, então limpamos os handlers
+    # de seus loggers para evitar duplicação de logs
     for uvicorn_logger_name in ("uvicorn", "uvicorn.error", "uvicorn.access"):
         logging.getLogger(uvicorn_logger_name).handlers.clear()
         logging.getLogger(uvicorn_logger_name).propagate = True
 
-    logging.info(f"Logging configurado. Logs serão gravados em: {log_path}")
+    logging.info("Logging configurado. Logs serão gravados em: %s", log_path)
     _configured = True
 
 def start_chronometer() -> Callable[[], timedelta]:

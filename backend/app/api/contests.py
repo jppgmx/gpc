@@ -32,7 +32,7 @@ class BasicOptions(BaseModel):
         "Se não fornecido, será usado o fuso horário do calendário do Google."
     )
 
-type Order = Literal["id"]
+Order = Literal["id"]
 class FilterParams(BasicOptions):
     """ Parâmetros de filtro para a listagem de concursos """
 
@@ -77,7 +77,10 @@ class FilterParams(BasicOptions):
             return value
 
         field_name = value.lstrip("-")
-        valid_fields = get_args(Order.__value__)
+
+        # Nem sempre type aliases definido por type obtém os args.
+        # pylint disable=E1101
+        valid_fields = get_args(Order)
 
         if field_name not in valid_fields:
             raise ValueError(f"Campo de ordenação inválido: {field_name}")
@@ -108,7 +111,10 @@ def get_contests(params: Annotated[FilterParams, Query()]):
     """
         Retorna uma lista de concursos com base nos filtros fornecidos.
     """
-    LOGGER.debug(f"Recebida requisição em /contests com parâmetros: {params.model_dump()}")
+    LOGGER.debug(
+        "Recebida requisição em /contests com parâmetros: %s",
+        params.model_dump(),
+    )
 
     with get_db_session() as session:
         query = session.query(Contest)
@@ -147,6 +153,7 @@ def get_contests(params: Annotated[FilterParams, Query()]):
         # da plataforma, para garantir a acurácia da normalização, vamos consultar
         # o calendário o seu fuso horário padrão, e então normalizar em seguida.
         if params.pretty_datetime and not params.timezone:
+            # pylint: disable=import-outside-toplevel
             from services.calendar_provider import CalendarProvider
             from services.data_store import DataStore
             from api.calendar import CALENDARS
@@ -162,16 +169,23 @@ def get_contests(params: Annotated[FilterParams, Query()]):
             page=params.page,
             limit=params.limit,
             contests=[
-                to_dict(contest, 
-                        pretty_datetime=params.pretty_datetime, 
-                        timezone=params.timezone) 
+                to_dict(contest,
+                        pretty_datetime=params.pretty_datetime,
+                        timezone=params.timezone)
                 for contest in contests
             ]
         )
 
 @router.get("/{contest_id}")
 def get_contest(contest_id: int, options: Annotated[BasicOptions, Query()]):
-    LOGGER.debug(f"Recebida requisição em /contests/{contest_id} com parâmetros: {options.model_dump()}")
+    """
+        Retorna informações detalhadas sobre um concurso específico.
+    """
+
+    LOGGER.debug(
+        "Recebida requisição em /contests/%s com parâmetros: %s",
+        contest_id, options.model_dump()
+    )
 
     with get_db_session() as session:
         contest = session.query(Contest).filter(Contest.id == contest_id).first()
@@ -196,6 +210,7 @@ def to_dict(contest: Contest, **kwargs) -> dict:
     result["durationSeconds"] = contest.duration_seconds
 
     if kwargs.get("pretty_datetime"):
+        # pylint: disable=import-outside-toplevel
         from datetime import timedelta
 
         duration = timedelta(seconds=contest.duration_seconds)
@@ -204,15 +219,17 @@ def to_dict(contest: Contest, **kwargs) -> dict:
     if contest.freeze_duration_seconds:
         result["freezeDurationSeconds"] = contest.freeze_duration_seconds
         if kwargs.get("pretty_datetime"):
+            # pylint: disable=import-outside-toplevel
             from datetime import timedelta
 
             freeze_duration = timedelta(seconds=contest.freeze_duration_seconds)
             result["freezeDuration"] = str(freeze_duration)
-    
+
     result["startTimeSeconds"] = contest.start_time_seconds
     result["relativeTimeSeconds"] = contest.relative_time_seconds
 
     if kwargs.get("pretty_datetime"):
+        # pylint: disable=import-outside-toplevel
         from datetime import datetime, timedelta, UTC
         from zoneinfo import ZoneInfo
 
@@ -220,8 +237,13 @@ def to_dict(contest: Contest, **kwargs) -> dict:
         if kwargs.get("timezone"):
             try:
                 timezone = ZoneInfo(kwargs.get("timezone"))
-            except Exception:
-                pass
+            except Exception as e:
+                LOGGER.warning(
+                    "Houve falha na obtenção do fuso horário %s," \
+                    "talvez seja inválido. Usando UTC como padrão." \
+                    "Erro: %s",
+                    kwargs.get("timezone"), e
+                )
 
         # Converter considerando a época Unix com fuso horário UTC
         start_time = datetime.fromtimestamp(contest.start_time_seconds, tz=UTC)

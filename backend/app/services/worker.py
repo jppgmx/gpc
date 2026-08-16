@@ -16,6 +16,7 @@ import models.contest as cm
 CODEFORCES_PROBLEMSET_URL = "https://codeforces.com/api/problemset.problems"
 CODEFORCES_CONTESTS_URL = "https://codeforces.com/api/contest.list"
 DEFAULT_INTERVAL = 2 * 60 # 2 minutos
+SYNC_GET_TIMEOUT = 30  # 30 segundos
 
 LOGGER = getLogger(__name__)
 
@@ -27,11 +28,14 @@ async def start_worker(**kwargs):
         try:
             start_time = chrono()
             await worker_loop(**kwargs)
-            LOGGER.info(f"Worker gastou {start_time().total_seconds():.2f} segundos na execução. Vou dormir...")
-        except Exception as e:
+            LOGGER.info(
+                "Worker gastou %.2f segundos na execução. Vou dormir...",
+                start_time().total_seconds()
+            )
+        except Exception as _:
             LOGGER.exception("Erro durante a execução do worker.")
         await sleep(DEFAULT_INTERVAL)
-        LOGGER.info(f"Retomando...")
+        LOGGER.info("Retomando...")
 
 async def worker_loop(**kwargs):
     """ Loop do worker """
@@ -49,14 +53,16 @@ def _run_sync_blocking():
         with session.begin():
             sync = chrono()
             sync_codeforces_problemset(session)
-            LOGGER.info(f"Sincronização do problemset concluída em {sync().total_seconds():.2f} segundos.")
+            LOGGER.info("Sincronização do problemset concluída em %.2f segundos.",
+                        sync().total_seconds())
 
         with session.begin():
             sync = chrono()
             sync_codeforces_contests(session)
-            LOGGER.info(f"Sincronização dos contests concluída em {sync().total_seconds():.2f} segundos.")
+            LOGGER.info("Sincronização dos contests concluída em %.2f segundos.",
+                        sync().total_seconds())
 
-    LOGGER.info(f"Tempo total da sincronização: {chronometer().total_seconds():.2f} segundos.")
+    LOGGER.info("Tempo total da sincronização: %.2f segundos.", chronometer().total_seconds())
 
 def sync_codeforces_problemset(session: Session):
     """ Sincroniza o problemset do Codeforces no banco de dados """
@@ -66,12 +72,12 @@ def sync_codeforces_problemset(session: Session):
 
     # 1. Buscar problemset do Codeforces
     LOGGER.info("Buscando problemset do Codeforces...")
-    response = get(CODEFORCES_PROBLEMSET_URL)
+    response = get(CODEFORCES_PROBLEMSET_URL, timeout=SYNC_GET_TIMEOUT)
     response.raise_for_status()
     problemset_data = response.json()
 
     total_problems = len(problemset_data['result']['problems'])
-    LOGGER.info(f"Total de problemas encontrados: {total_problems}")
+    LOGGER.info("Total de problemas encontrados: %d", total_problems)
     # 2. Montar lista de problemas e dicionários
     statistics = {
         (stat['contestId'], stat['index']): stat['solvedCount']
@@ -80,7 +86,7 @@ def sync_codeforces_problemset(session: Session):
 
     # 3. Cachear as tags existentes no banco de dados para evitar duplicatas
     existing_tags = {tag.name: tag for tag in session.query(psm.Tag).all()}
-    LOGGER.debug(f"Tags existentes no banco de dados: {list(existing_tags.keys())}")
+    LOGGER.debug("Tags existentes no banco de dados: %s", list(existing_tags.keys()))
 
     i = 1
     LOGGER.info("Sincronizando problemas...")
@@ -88,14 +94,17 @@ def sync_codeforces_problemset(session: Session):
         key = (problem['contestId'], problem['index'])
         tags = []
 
-        LOGGER.debug(f"Processando problema {i}/{total_problems}: {problem['name']} ID: {key[0]}{key[1]}")
+        LOGGER.debug(
+            "Processando problema %d/%d: %s ID: %d%s",
+            i, total_problems, problem['name'], key[0], key[1]
+        )
 
         for tag_name in problem.get('tags', []):
             if tag_name not in existing_tags:
                 new_tag = psm.Tag(name=tag_name)
                 session.add(new_tag)
                 existing_tags[tag_name] = new_tag
-            
+
             tags.append(existing_tags[tag_name])
 
         # 4. Checar se existe
@@ -141,18 +150,21 @@ def sync_codeforces_contests(session: Session):
 
     # 1. Buscar concursos do Codeforces
     LOGGER.info("Buscando concursos do Codeforces...")
-    response = get(CODEFORCES_CONTESTS_URL)
+    response = get(CODEFORCES_CONTESTS_URL, timeout=SYNC_GET_TIMEOUT)
     response.raise_for_status()
     contests_data = response.json()
 
     total_contests = len(contests_data['result'])
-    LOGGER.info(f"Total de concursos encontrados: {total_contests}")
+    LOGGER.info("Total de concursos encontrados: %d", total_contests)
     i = 1
 
     # 2. Montar lista de concursos
     LOGGER.info("Sincronizando concursos...")
     for contest in contests_data['result']:
-        LOGGER.debug(f"Processando concurso {i}/{total_contests}: {contest['name']} ID: {contest['id']}")
+        LOGGER.debug(
+            "Processando concurso %d/%d: %s ID: %d",
+            i, total_contests, contest['name'], contest['id']
+        )
 
         # 3. Checar se existe
         existing_contest = session.query(cm.Contest).filter_by(id=contest['id']).first()
