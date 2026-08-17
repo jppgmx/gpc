@@ -1,0 +1,37 @@
+services:
+  n8n:
+    image: n8nio/n8n
+    env_file:
+      - .env
+    container_name: gpc_n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    volumes:
+      - ./.n8n_data:/home/node/.n8n
+    environment:
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PROTOCOL=${N8N_PROTOCOL}
+      - N8N_PORT=${N8N_PORT}
+      - WEBHOOK_URL=${WEBHOOK_URL}
+      - N8N_EDITOR_BASE_URL=${N8N_EDITOR_BASE_URL}
+
+  backend:
+    build: ./backend
+    container_name: gpc_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/app
+
+  caddy:
+    image: caddy:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - .caddy_data:/data

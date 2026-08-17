@@ -50,7 +50,7 @@ start: .env
 	docker compose up -d --build
 
 # Inicia apenas o container do n8n
-start-n8n:
+start-n8n: .env
 	docker compose up -d n8n
 
 # Inicia apenas o container do backend
@@ -68,6 +68,14 @@ stop-n8n:
 # Para parar apenas o container do backend
 stop-backend:
 	docker compose down backend
+
+# Inicia os containers do docker em produção
+start-prod: .env
+	docker compose -f docker-compose.prod.yml up -d --build
+
+# Para parar os containers do docker em produção
+stop-prod:
+	docker compose -f docker-compose.prod.yml down
 
 # Exporta todos os workflows do n8n para a pasta workflows
 export-workflows: start-n8n
@@ -115,6 +123,7 @@ clean:
 	find . -type d -name "*.egg-info" -exec rm -rf {} +
 	find . -type f -name "*.pyc" -delete
 	docker compose down -v --remove-orphans
+	docker compose -f docker-compose.prod.yml down -v --remove-orphans
 	docker system prune -f
 
 # Atalho para atualizar a árvore do leia-me do projeto

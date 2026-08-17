@@ -1,0 +1,4 @@
+# Caddyfile
+gpc-jppgmx.duckdns.org {
+    reverse_proxy n8n:5678
+}
