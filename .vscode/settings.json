@@ -8,6 +8,7 @@
     ],
     "pylint.enabled": true,
     "pylint.args": [
+        "-j 4",
         "--rcfile",
         "${workspaceFolder}/backend/.pylintrc"
     ]

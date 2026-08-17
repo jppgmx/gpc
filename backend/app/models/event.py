@@ -157,6 +157,9 @@ class Reminders(BaseModel):
     use_default: bool = Field(alias="useDefault")
     overrides: Optional[list[Reminder]] = Field(default=None, alias="overrides")
 
+EventStatus = Literal["confirmed", "tentative", "cancelled"]
+EventType = Literal["default", "birthday", "focusTime",
+                    "fromGmail", "outOfOffice", "workingLocation"]
 class Event(BaseModel):
     """
         Representa um evento do Google Calendar.
@@ -167,7 +170,7 @@ class Event(BaseModel):
     kind: Literal["calendar#event"] = "calendar#event"
     etag: str
     id: str
-    status: Literal["confirmed", "tentative", "cancelled"]
+    status: EventStatus
     html_link: str = Field(alias="htmlLink")
     created: datetime
     updated: datetime
@@ -188,10 +191,11 @@ class Event(BaseModel):
     i_cal_uid: str = Field(alias="iCalUID")
     sequence: int
     reminders: Reminders
-    event_type: Literal["default", "birthday", "focusTime",
-                        "fromGmail", "outOfOffice", "workingLocation"] = Field(alias="eventType")
+    event_type: EventType = Field(alias="eventType")
 
 
+EventListAccessRole = Literal["none", "freeBusyReader", "reader",
+                              "writerWithoutPrivateAccess", "writer", "owner"]
 class EventList(BaseModel):
     """
         Representa uma lista de eventos do Google Calendar, retornada por events.list().
@@ -204,8 +208,7 @@ class EventList(BaseModel):
     description: str # Mantemos como str obrigatória, pois vimos que retorna "" (string vazia)
     updated: datetime
     time_zone: str = Field(alias="timeZone")
-    access_role: Literal["none", "freeBusyReader", "reader",
-                         "writerWithoutPrivateAccess", "writer", "owner"] = Field(alias="accessRole")
+    access_role: EventListAccessRole = Field(alias="accessRole")
 
     # defaultReminders sempre retornou, mas vazio na prática.
     default_reminders: list[Reminder] = Field(default=[], alias="defaultReminders")

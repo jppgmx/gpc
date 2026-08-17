@@ -41,7 +41,10 @@ def get_calendar(calendar_id: str):
         Retorna informações sobre um calendário específico.
     """
 
-    LOGGER.debug(f"Recebida requisição em /calendar/{calendar_id} com parâmetros: {{'calendar_id': '{calendar_id}'}}")
+    LOGGER.debug(
+        "Recebida requisição em /calendar/%s com parâmetros: {'calendar_id': '%s'}", 
+        calendar_id, calendar_id
+    )
 
     if not calendar_id in CALENDARS:
         return {"error": "Calendário não encontrado."}
@@ -65,13 +68,34 @@ class FilterParams(BaseModel):
     """
     model_config = ConfigDict(extra="forbid")
 
-    q: Optional[str] = Field(None, description="Termo de pesquisa para filtrar eventos.")
-    start: Optional[str] = Field(None, description="Data de início para filtrar eventos (RFC 3339).")
-    end: Optional[str] = Field(None, description="Data de término para filtrar eventos (RFC 3339).")
-    timezone: Optional[str] = Field(None, description="Fuso horário para os eventos.")
-    order_by: Optional[str] = Field(None, description="Campo pelo qual ordenar os eventos.")
-    page: Optional[int] = Field(default=1, description="Número da página de resultados a ser retornada.")
-    limit: Optional[int] = Field(default=10, ge=1, le=100, description="Número máximo de eventos a serem retornados.")
+    q: Optional[str] = Field(
+        None,
+        description="Termo de pesquisa para filtrar eventos."
+    )
+    start: Optional[str] = Field(
+        None,
+        description="Data de início para filtrar eventos (RFC 3339)."
+    )
+    end: Optional[str] = Field(
+        None,
+        description="Data de término para filtrar eventos (RFC 3339)."
+    )
+    timezone: Optional[str] = Field(
+        None,
+        description="Fuso horário para os eventos."
+    )
+    order_by: Optional[str] = Field(
+        None,
+        description="Campo pelo qual ordenar os eventos."
+    )
+    page: Optional[int] = Field(
+        default=1,
+        description="Número da página de resultados a ser retornada."
+    )
+    limit: Optional[int] = Field(
+        default=10, ge=1, le=100,
+        description="Número máximo de eventos a serem retornados."
+    )
 
 def to_rfc3339(dt: str, timezone: ZoneInfo) -> str:
     """
@@ -90,7 +114,10 @@ def get_calendar_events(calendar_id: str, params: Annotated[FilterParams, Query(
     """
         Retorna uma lista de eventos de um calendário específico, com suporte a filtros e paginação.
     """
-    LOGGER.debug(f"Recebida requisição em /calendar/{calendar_id}/events com parâmetros: {params.model_dump()}")
+    LOGGER.debug(
+        "Recebida requisição em /calendar/%s/events com parâmetros: %s", 
+        calendar_id, params.model_dump()
+    )
 
     if calendar_id == "all":
         return {"error": "Não é possível listar eventos de todos os calendários."}

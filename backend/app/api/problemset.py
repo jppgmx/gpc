@@ -19,6 +19,14 @@ router = APIRouter(prefix="/problemset", tags=["Problemset"])
 LOGGER = getLogger(__name__)
 
 type Order = Literal["contestId", "index", "solvedCount", "rating", "points", "name"]
+ORDER_MAPPINGS = {
+    "contestId": "contest_id",
+    "index": "index",
+    "solvedCount": "solved_count",
+    "rating": "rating",
+    "points": "points",
+    "name": "name"
+}
 
 class FilterParams(BaseModel):
     """ Parâmetros de filtro para a listagem de problemas """
@@ -70,27 +78,33 @@ class FilterParams(BaseModel):
 
     @property
     def tags_list(self) -> Optional[list[str]]:
+        """ Retorna a lista de tags do problema """
         if self.tags is None:
             return None
 
         # Remove espaços e divide por vírgula
+        # pylint disable=no-member
         normalized = [tag.strip() for tag in self.tags.split(",") if tag.strip()]
         if len(normalized) == 0:
-            return None
+            return []
 
         return normalized
 
     @property
     def order_by_list(self) -> list[str]:
+        """ Retorna a lista de campos para ordenação """
+
         if self.order_by is None:
             return ["name"]
 
         # Remove espaços e divide por vírgula
+        # pylint disable=no-member
         normalized = [order.strip() for order in self.order_by.split(",") if order.strip()]
         if len(normalized) == 0:
             return ["name"]
 
         # Valida se todos os campos são válidos
+        # pylint disable=no-member
         valid_fields = get_args(Order.__value__)
         for order in normalized:
             field_name = order[1:] if order.startswith("-") else order
@@ -101,7 +115,9 @@ class FilterParams(BaseModel):
 
     @field_validator("tags", mode="before")
     @classmethod
-    def validate_tags(cls, v):
+    def validate_tags(cls, v: str | None):
+        """ Valida o campo tags """
+
         if v is None:
             return v
 
@@ -114,7 +130,9 @@ class FilterParams(BaseModel):
 
     @field_validator("order_by", mode="before")
     @classmethod
-    def validate_order_by(cls, v):
+    def validate_order_by(cls, v: str | None):
+        """ Valida o campo order_by """
+
         if v is None:
             return ["name"]
 
@@ -124,6 +142,7 @@ class FilterParams(BaseModel):
             return ["name"]
 
         # Valida se todos os campos são válidos
+        # pylint disable=no-member
         valid_fields = get_args(Order.__value__)
         for order in normalized:
             field_name = order[1:] if order.startswith("-") else order
@@ -152,58 +171,54 @@ def is_valid_page(page: int, limit: int, total: int) -> bool:
     return (page - 1) * limit < total
 
 @router.get("/problems")
-def get_problems(filter: Annotated[FilterParams, Query()]):
+def get_problems(params: Annotated[FilterParams, Query()]):
     """
         Retorna uma lista de problemas com base nos filtros fornecidos.
     """
 
-    LOGGER.debug(f"Recebida requisição em /problemset/problems com parâmetros: {filter.model_dump()}")
+    LOGGER.debug(
+        "Recebida requisição em /problemset/problems com parâmetros: %s",
+        params.model_dump()
+    )
 
     with get_db_session() as session:
         query = session.query(Problem)
 
-        if filter.contest_id and filter.index:
-            # Estamos fazendo o mesmo que /problems/{problem_id}, então podemos retornar apenas um problema
-            problem = query.filter_by(contest_id=filter.contest_id, index=filter.index).first()
+        if params.contest_id and params.index:
+            # Estamos fazendo o mesmo que /problems/{problem_id},
+            # então podemos retornar apenas um problema
+            problem = query.filter_by(contest_id=params.contest_id, index=params.index).first()
             if not problem:
                 return EMPTY_RESPONSE
 
             return single(problem)
 
-        if filter.q:
-            query = query.filter(Problem.name.ilike(f"%{filter.q}%"))
-        if filter.contest_id:
-            query = query.filter(Problem.contest_id == filter.contest_id)
-        if filter.index:
-            query = query.filter(Problem.index == filter.index)
-        if filter.rating:
-            query = query.filter(Problem.rating == filter.rating)
-        if filter.min_points:
-            query = query.filter(Problem.points >= filter.min_points)
-        if filter.tags:
-            for tag in filter.tags_list:
+        if params.q:
+            query = query.filter(Problem.name.ilike(f"%{params.q}%"))
+        if params.contest_id:
+            query = query.filter(Problem.contest_id == params.contest_id)
+        if params.index:
+            query = query.filter(Problem.index == params.index)
+        if params.rating:
+            query = query.filter(Problem.rating == params.rating)
+        if params.min_points:
+            query = query.filter(Problem.points >= params.min_points)
+        if params.tags:
+            for tag in params.tags_list:
                 query = query.filter(Problem.tags.any(name=tag))
 
         total_count = query.count()
 
-        if not is_valid_page(filter.page, filter.limit, total_count):
+        if not is_valid_page(params.page, params.limit, total_count):
             return ProblemResponse(
                 error="Página inválida",
                 total=total_count,
-                page=filter.page,
-                limit=filter.limit,
+                page=params.page,
+                limit=params.limit,
                 problems=[]
             )
 
-        ORDER_MAPPINGS = {
-            "contestId": "contest_id",
-            "index": "index",
-            "solvedCount": "solved_count",
-            "rating": "rating",
-            "points": "points",
-            "name": "name"
-        }
-        for order in filter.order_by_list:
+        for order in params.order_by_list:
             mapped_order = ORDER_MAPPINGS.get(order.lstrip("-"))
             if order.startswith("-"):
                 query = query.order_by(getattr(Problem, mapped_order).desc())
@@ -211,15 +226,15 @@ def get_problems(filter: Annotated[FilterParams, Query()]):
                 query = query.order_by(getattr(Problem, mapped_order))
 
         problems = (
-            query.offset((filter.page - 1) * filter.limit)
-            .limit(filter.limit)
+            query.offset((params.page - 1) * params.limit)
+            .limit(params.limit)
             .all()
         )
 
         return ProblemResponse(
             total=total_count,
-            page=filter.page,
-            limit=filter.limit,
+            page=params.page,
+            limit=params.limit,
             problems=[to_dict(problem) for problem in problems]
         )
 
@@ -229,12 +244,17 @@ def get_problem(problem_id: Annotated[str, Field(pattern=PROBLEM_ID_REGEX)]):
         Retorna informações sobre um problema específico.
     """
 
-    LOGGER.debug(f"Recebida requisição em /problemset/problems/{problem_id} com parâmetros: {{'problem_id': '{problem_id}'}}")
+    LOGGER.debug(
+        "Recebida requisição em /problemset/problems/%s com parâmetros: {'problem_id': '%s'}",
+        problem_id, problem_id
+    )
 
     contest_id, problem_index = match(PROBLEM_ID_REGEX, problem_id).groups()
     result = {}
     with get_db_session() as session:
-        problem = session.query(Problem).filter_by(contest_id=contest_id, index=problem_index).first()
+        problem = session.query(Problem).filter_by(
+            contest_id=contest_id, index=problem_index
+        ).first()
 
         if not problem:
             return {

@@ -38,6 +38,9 @@ parceria com a Alura.
 Projeto desenvolvido para o Challenge Agente da Alura, em parceria com a
 Oracle Next Education (ONE).
 
+A próxima etapa é tentar fazer deploy, a ideia era usar OCI, mas devido uns
+problemas, estarei usando a AWS.
+
 ## Não afiliação e transparência
 
 O GPC **não é afiliado, endossado ou mantido pelo Codeforces** ou pela
@@ -125,6 +128,7 @@ o backend pega esses dados, normaliza e cacheia.
 │   │   │   ├── data_store.py
 │   │   │   ├── db.py
 │   │   │   ├── document_provider.py
+│   │   │   ├── logging.py
 │   │   │   ├── secrets.py
 │   │   │   └── worker.py
 │   │   └── main.py
@@ -139,14 +143,38 @@ o backend pega esses dados, normaliza e cacheia.
 │   ├── requirements.txt
 │   └── requirements-dev.txt
 ├── scripts
-│   └── copy_workflows.py
+│   ├── copy_workflows.py
+│   └── envgen.py
 ├── workflows
 │   ├── gpc-agent.json
 │   └── gpc-docs.json
+├── Caddyfile
+├── docker-compose.prod.yml
 ├── docker-compose.yml
 ├── Makefile
 └── README.md
 ```
+
+## Tecnologias usadas
+
+As principais tecnologias e ferramentas usadas neste projeto incluem:
+
+- Python 3.12
+- FastAPI (backend web framework)
+- Uvicorn (ASGI server)
+- SQLite (banco de dados)
+- SQLAlchemy (ORM)
+- requests (cliente HTTP)
+- Pydantic (validação de dados)
+- BeautifulSoup4 (parser de HTML)
+- markdownify (conversor de HTML para Markdown)
+- Google APIs (integração com o Calendário)
+- tzdata (informações de fuso horário)
+- psutil (métricas de % de CPU e RAM)
+- n8n (automação/workflows)
+- Docker e Docker Compose
+- make
+- pylint
 
 ## Pré-requisitos
 
@@ -169,6 +197,14 @@ Esse alvo:
 - instala dependências de `backend/requirements.txt`;
 - instala dependências adicionais de `backend/requirements-dev.txt`
 - instala o backend em modo editável (`pip install -e .`).
+
+## Pylint
+
+É possível rodar o Pylint para checar a sintaxe do código:
+
+```bash
+make pylint
+```
 
 ## Executando com Docker
 
@@ -196,6 +232,31 @@ Parar tudo:
 make stop
 ```
 
+Tem também `stop-n8n` e `stop-backend`.
+
+## ou localmente
+
+```bash
+make server
+```
+
+## Produção
+
+No make:
+```bash
+make start-prod # Inicia
+make stop-prod # Para
+```
+
+Usam a versão `docker-compose.prod.yml`, que é idêntica ao `docker-compose.yml` para n8n e backend,
+apenas é adicionado um contêiner do Caddy para DNS.
+
+## Notas de inicialização
+
+- Você pode usar a variável de ambiente `LOG_LEVEL` para definir a severidade dos logs;
+- Antes de iniciar, o make gera um .env se não existir com base em valores customizados ou padrão,
+  confira `.env.template`.
+
 ## Endpoints do backend
 
 Base local esperada: `http://localhost:8000`
@@ -209,9 +270,9 @@ Base local esperada: `http://localhost:8000`
 - `GET /api/calendar/all` -> todos os calendários
 - `GET /api/calendar/{calendário}/events` -> eventos do calendário especificado
 - `GET /api/problemset/problems` -> todos os problemas do Codeforces
-- `GET /api/problemset/problems/{¹id}` -> um problema do Codeforces
+- `GET /api/problemset/problems/{id¹}` -> um problema do Codeforces
 - `GET /api/contests` -> todas as contests do Codeforces
-- `GET /api/contests/{²id}` -> uma contest (ou concurso, se traduzir literalmente) do Codeforces
+- `GET /api/contests/{id²}` -> uma contest (ou concurso, se traduzir literalmente) do Codeforces
 
 ¹O ID de um problema é composto por duas partes:
   - ID da Contest: Um valor numérico como 4, 2251 etc.
@@ -239,6 +300,12 @@ make export-workflows
 Observação: o processo usa `scripts/copy_workflows.py` para copiar e renomear
 os arquivos com base no campo `name` do JSON.
 
+Importar workflows:
+
+```bash
+make import-workflows
+```
+
 ## Limpeza do ambiente
 
 ```bash
@@ -262,7 +329,8 @@ Docker relacionados ao projeto.
 - [x] Consulta ao banco de questões por rating/tags e demais filtros
 - [x] Consulta as contests
 - [x] Calendário de contests usando Google Calendar API
-- [ ] Adicionar logging para o backend
+- [x] Adicionar logging para o backend
+- [ ] deploy para AWS
 - [ ] Melhorar em relação ao modelo e RAG¹
 - [ ] Busca de enunciados de cada problema
 - [ ] FAQ, via API oficial e blogs do Codeforces

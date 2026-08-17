@@ -62,21 +62,74 @@ class Contest(ContestsBase):
 
     __tablename__ = 'contest'
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(Text)
-    type: Mapped[ContestType] = mapped_column(Enum(ContestType))
-    phase: Mapped[ContestPhase] = mapped_column(Enum(ContestPhase))
-    frozen: Mapped[bool] = mapped_column(Boolean)
-    duration_seconds: Mapped[int] = mapped_column("durationSeconds", Integer)
-    freeze_duration_seconds: Mapped[Optional[int]] = mapped_column("freezeDurationSeconds", Integer, nullable=True)
-    start_time_seconds: Mapped[Optional[int]] = mapped_column("startTimeSeconds", Integer, nullable=True)
-    relative_time_seconds: Mapped[Optional[int]] = mapped_column("relativeTimeSeconds", Integer, nullable=True)
-    prepared_by: Mapped[Optional[str]] = mapped_column("preparedBy", Text, nullable=True)
-    website_url: Mapped[Optional[str]] = mapped_column("websiteUrl", Text, nullable=True)
-    description: Mapped[Optional[str]] = mapped_column(Text(), nullable=True)
-    difficulty: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    kind: Mapped[Optional[str]] = mapped_column(Text(), nullable=True)
-    icpc_region: Mapped[Optional[str]] = mapped_column("icpcRegion", Text(), nullable=True)
-    country: Mapped[Optional[str]] = mapped_column(Text(), nullable=True)
-    city: Mapped[Optional[str]] = mapped_column(Text(), nullable=True)
-    season: Mapped[Optional[str]] = mapped_column(Text(), nullable=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True
+    )
+
+    name: Mapped[str] = mapped_column(
+        Text
+    )
+
+    type: Mapped[ContestType] = mapped_column(
+        Enum(ContestType)
+    )
+
+    phase: Mapped[ContestPhase] = mapped_column(
+        Enum(ContestPhase)
+    )
+
+    frozen: Mapped[bool] = mapped_column(
+        Boolean
+    )
+
+    duration_seconds: Mapped[int] = mapped_column(
+        "durationSeconds", Integer
+    )
+
+    freeze_duration_seconds: Mapped[Optional[int]] = mapped_column(
+        "freezeDurationSeconds", Integer, nullable=True
+    )
+
+    start_time_seconds: Mapped[Optional[int]] = mapped_column(
+        "startTimeSeconds", Integer, nullable=True
+    )
+
+    relative_time_seconds: Mapped[Optional[int]] = mapped_column(
+        "relativeTimeSeconds", Integer, nullable=True
+    )
+
+    prepared_by: Mapped[Optional[str]] = mapped_column(
+        "preparedBy", Text, nullable=True
+    )
+
+    website_url: Mapped[Optional[str]] = mapped_column(
+        "websiteUrl", Text, nullable=True
+    )
+
+    description: Mapped[Optional[str]] = mapped_column(
+        Text(), nullable=True
+    )
+
+    difficulty: Mapped[Optional[int]] = mapped_column(
+        Integer, nullable=True
+    )
+
+    kind: Mapped[Optional[str]] = mapped_column(
+        Text(), nullable=True
+    )
+
+    icpc_region: Mapped[Optional[str]] = mapped_column(
+        "icpcRegion", Text(), nullable=True
+    )
+
+    country: Mapped[Optional[str]] = mapped_column(
+        Text(), nullable=True
+    )
+
+    city: Mapped[Optional[str]] = mapped_column(
+        Text(), nullable=True
+    )
+
+    season: Mapped[Optional[str]] = mapped_column(
+        Text(), nullable=True
+    )

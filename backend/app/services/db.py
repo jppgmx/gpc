@@ -26,7 +26,11 @@ DATABASE_URL = get_env_variable("DATABASE_URL", get_default_url())
 engine = create_engine(DATABASE_URL)
 
 @event.listens_for(engine, "connect")
-def enable_wal(dbapi_connection, connection_record):
+def enable_wal(dbapi_connection, _):
+    """ 
+        Habilita WAL (Write-Ahead Logging) caso o banco de dados seja SQLite.
+    """
+
     if engine.dialect.name == "sqlite":
         LOGGER.debug("Habilitando o modo WAL no SQLite...")
         cursor = dbapi_connection.cursor()

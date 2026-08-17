@@ -1,5 +1,7 @@
 .n8n_data/
 .data/
+.caddy_data/
 .venv/
 __pycache__/
 *.pyc
+.env
