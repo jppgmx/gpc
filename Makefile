@@ -25,7 +25,7 @@ PIP = pip
 DOCKER_N8N := docker compose exec n8n
 
 .PHONY: setup pylint start start-n8n start-backend stop stop-n8n stop-backend start-prod stop-prod \
-		export-workflows import-workflows envgen clean tree
+		export-workflows import-workflows clean tree
 
 
 # Configura ambiente de desenvolvimento
@@ -113,10 +113,6 @@ import-workflows: start-n8n
 			--overwrite; \
 	done
 
-# Chama envgen.py para gerar o arquivo .env a partir do .env.template
-envgen:
-	$(PYTHON) $(SCRIPTS_DIR)/envgen.py
-
 # Limpa arquivos temporários, venv e containers do docker
 clean:
 	rm -f .env
@@ -143,4 +139,5 @@ $(VENV_DIR):
 	$(PYTHON) -m venv $(VENV_DIR)
 
 # Atalho para criar o arquivo .env
-.env: envgen
+.env:
+	$(PYTHON) $(SCRIPTS_DIR)/envgen.py
