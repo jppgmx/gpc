@@ -46,7 +46,7 @@ pylint:
 	$(ACTIVATE) && pylint backend/app
 
 # Inicia os containers do docker
-start:
+start: .env
 	docker compose up -d --build
 
 # Inicia apenas o container do n8n
@@ -89,8 +89,27 @@ export-workflows: start-n8n
 	
 	$(PYTHON) $(SCRIPTS_DIR)/copy_workflows.py "$(N8N_DIR)/exports" "$(WORKFLOWS_DIR)"
 
+# Importa todos os workflows da pasta workflows para o n8n
+import-workflows: start-n8n
+	$(DOCKER_N8N) sh -lc 'rm -rf /home/node/.n8n/imports'
+	$(DOCKER_N8N) sh -lc 'mkdir -p /home/node/.n8n/imports'
+	$(DOCKER_N8N) sh -lc 'chown -R node:node /home/node/.n8n/imports'
+	for workflow_file in $(WORKFLOWS_DIR)/*.json; do \
+		cp "$$workflow_file" "$(N8N_DIR)/imports/"; \
+		workflow_name=$$(basename "$$workflow_file" .json); \
+		MSYS2_ARG_CONV_EXCL='--input=' \
+		$(DOCKER_N8N) n8n import:workflow \
+			--input=/home/node/.n8n/imports/$$workflow_name.json \
+			--overwrite; \
+	done
+
+# Chama envgen.py para gerar o arquivo .env a partir do .env.template
+envgen:
+	$(PYTHON) $(SCRIPTS_DIR)/envgen.py
+
 # Limpa arquivos temporários, venv e containers do docker
 clean:
+	rm -f .env
 	rm -rf $(VENV_DIR)
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 	find . -type d -name "*.egg-info" -exec rm -rf {} +
@@ -111,4 +130,6 @@ tree:
 # Cria venv caso não exista
 $(VENV_DIR):
 	$(PYTHON) -m venv $(VENV_DIR)
-	
+
+# Atalho para criar o arquivo .env
+.env: envgen
