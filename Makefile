@@ -24,7 +24,9 @@ PIP = pip
 
 DOCKER_N8N := docker compose exec n8n
 
-.PHONY: setup start stop clean
+.PHONY: setup pylint start start-n8n start-backend stop stop-n8n stop-backend start-prod stop-prod \
+		export-workflows import-workflows envgen clean tree
+
 
 # Configura ambiente de desenvolvimento
 setup: $(VENV_DIR)
