@@ -27,7 +27,7 @@
 from typing import Optional, List
 import enum
 from sqlalchemy import String, Integer, Float, Enum
-from sqlalchemy import UniqueConstraint, ForeignKey
+from sqlalchemy import UniqueConstraint, ForeignKey, ForeignKeyConstraint
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -51,10 +51,9 @@ class Problem(ProblemsetBase):
             'contestId', 'index'
         ),
     )
-    id: Mapped[int] = mapped_column(primary_key=True) # ID da linha
-    contest_id: Mapped[int] = mapped_column("contestId", Integer)
+    contest_id: Mapped[int] = mapped_column("contestId", Integer, primary_key=True)
+    index: Mapped[str] = mapped_column(String(10), primary_key=True)
     problemset_name: Mapped[str | None] = mapped_column("problemsetName", String(255))
-    index: Mapped[str] = mapped_column(String(10))
     name: Mapped[str] = mapped_column(String(255))
     type: Mapped[ProblemType] = mapped_column(Enum(ProblemType))
     points: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
@@ -70,11 +69,21 @@ class ProblemTag(ProblemsetBase):
 
     __tablename__ = 'problem_tag'
 
-    problem_id: Mapped[int] = mapped_column(
-        "problemId", ForeignKey("problem.id"), primary_key=True
+    problem_contest_id: Mapped[int] = mapped_column(
+        "problemContestId", primary_key=True
+    )
+    problem_index: Mapped[str] = mapped_column(
+        "problemIndex", primary_key=True
     )
     tag_id: Mapped[int] = mapped_column(
         "tagId", ForeignKey("tag.id"), primary_key=True
+    )
+
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ['problemContestId', 'problemIndex'],
+            ['problem.contestId', 'problem.index']
+        ),
     )
 
 class Tag(ProblemsetBase):
