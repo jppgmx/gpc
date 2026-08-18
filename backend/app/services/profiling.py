@@ -9,7 +9,6 @@ from abc import ABC, abstractmethod
 from asyncio import sleep
 from datetime import UTC, datetime
 from gzip import GzipFile
-from importlib.resources import path
 from logging import getLogger
 from pathlib import Path
 from typing import Any, TextIO
@@ -33,7 +32,10 @@ class MetricWriterBase(ABC):
 
     BASE_FIELDS = ("timestamp",)
 
-    def __init__(self, path: Path, max_size: int = METRIC_MAX_SIZE, max_files: int = METRIC_MAX_FILES) -> None:
+    def __init__(self, 
+                 path: Path, 
+                 max_size: int = METRIC_MAX_SIZE, 
+                 max_files: int = METRIC_MAX_FILES) -> None:
         self._file = path.open(
             mode="a",
             newline="",
@@ -124,6 +126,7 @@ class ProcessMetricWriter(MetricWriterBase):
         )
 
     def collect(self) -> dict[str, Any]:
+        # pylint: disable=import-outside-toplevel
         from platform import system
         memory = self._process.memory_info()
         if system() == "Windows" and not hasattr(self._process, "num_fds"):
@@ -169,7 +172,7 @@ class SystemMetricWriter(MetricWriterBase):
             "load_1m": psutil.getloadavg()[0],
         }
 
-def rotate_file(f: TextIO, max_size: int = METRIC_MAX_SIZE, 
+def rotate_file(f: TextIO, max_size: int = METRIC_MAX_SIZE,
                 max_rotations: int = METRIC_MAX_FILES) -> TextIO:
     """
         Rotaciona o arquivo de métricas se ele ultrapassar o tamanho máximo, comprimindo-o
@@ -218,7 +221,7 @@ async def start_profiling(data_store: DataStore):
             try:
                 process_writer.write()
                 system_writer.write()
-            except:
+            except Exception as _:
                 LOGGER.exception("Erro durante a coleta de métricas.")
             await sleep(PROFILING_INTERVAL / 1000)
     finally:
