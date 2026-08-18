@@ -16,7 +16,7 @@ import models.contest as cm
 
 CODEFORCES_PROBLEMSET_URL = "https://codeforces.com/api/problemset.problems"
 CODEFORCES_CONTESTS_URL = "https://codeforces.com/api/contest.list"
-DEFAULT_INTERVAL = 2 * 60 # 2 minutos
+DEFAULT_INTERVAL = 6 * 60 * 60 # 6 horas
 SYNC_GET_TIMEOUT = 30  # 30 segundos
 
 LOGGER = getLogger(__name__)
