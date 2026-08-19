@@ -11,6 +11,7 @@ from fastapi import FastAPI
 from api import docs, calendar, problemset, contests
 from services.data_store import DataStore
 from services.logging import setup_logging
+from services.profiling import start_profiling
 from services.worker import start_worker
 
 @asynccontextmanager
@@ -21,10 +22,15 @@ async def lifespan(_: FastAPI):
     store = DataStore()
     setup_logging(store)
 
+    # Incia o profiling
+    profiling = create_task(start_profiling(store))
+
     # Inicia o worker em segundo plano
-    task = create_task(start_worker())
+    worker = create_task(start_worker())
+
     yield
-    task.cancel()
+    profiling.cancel()
+    worker.cancel()
 
 app = FastAPI(
     title="GPC Backend",

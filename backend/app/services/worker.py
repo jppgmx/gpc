@@ -6,16 +6,17 @@ from asyncio import sleep, to_thread
 from logging import getLogger
 
 from requests import get
+from sqlalchemy import delete, insert
 from sqlalchemy.orm import Session
 
-from services.db import get_db_session
+from services.db import get_db_session, insert_update, get_max_batch_size
 from services.logging import start_chronometer as chrono
 import models.problemset as psm
 import models.contest as cm
 
 CODEFORCES_PROBLEMSET_URL = "https://codeforces.com/api/problemset.problems"
 CODEFORCES_CONTESTS_URL = "https://codeforces.com/api/contest.list"
-DEFAULT_INTERVAL = 2 * 60 # 2 minutos
+DEFAULT_INTERVAL = 6 * 60 * 60 # 6 horas
 SYNC_GET_TIMEOUT = 30  # 30 segundos
 
 LOGGER = getLogger(__name__)
@@ -41,10 +42,10 @@ async def worker_loop(**kwargs):
     """ Loop do worker """
 
     # Executa a sincronização de forma bloqueante em uma thread separada
-    await to_thread(_run_sync_blocking)
+    await to_thread(_run_sync_blocking, **kwargs)
 
 
-def _run_sync_blocking():
+def _run_sync_blocking(**kwargs):
     """ Executa a sincronização de forma bloqueante """
     LOGGER.info("Iniciando sincronização com o Codeforces...")
     chronometer = chrono()
@@ -75,6 +76,7 @@ def sync_codeforces_problemset(session: Session):
     response = get(CODEFORCES_PROBLEMSET_URL, timeout=SYNC_GET_TIMEOUT)
     response.raise_for_status()
     problemset_data = response.json()
+    LOGGER.debug("CF status: %s", problemset_data['status'])
 
     total_problems = len(problemset_data['result']['problems'])
     LOGGER.info("Total de problemas encontrados: %d", total_problems)
@@ -83,63 +85,99 @@ def sync_codeforces_problemset(session: Session):
         (stat['contestId'], stat['index']): stat['solvedCount']
         for stat in problemset_data['result']['problemStatistics']
     }
+    problemset_data = problemset_data['result']['problems']
 
     # 3. Cachear as tags existentes no banco de dados para evitar duplicatas
     existing_tags = {tag.name: tag for tag in session.query(psm.Tag).all()}
     LOGGER.debug("Tags existentes no banco de dados: %s", list(existing_tags.keys()))
 
-    i = 1
     LOGGER.info("Sincronizando problemas...")
-    for problem in problemset_data['result']['problems']:
-        key = (problem['contestId'], problem['index'])
-        tags = []
-
+    for i in range(0, total_problems):
+        problem = problemset_data[i]
         LOGGER.debug(
-            "Processando problema %d/%d: %s ID: %d%s",
-            i, total_problems, problem['name'], key[0], key[1]
+            "Processando problema %d/%d: %s (Contest ID: %s, Index: %s)",
+            i+1, total_problems, problem['name'], problem.get('contestId'), problem['index']
         )
 
         for tag_name in problem.get('tags', []):
             if tag_name not in existing_tags:
+                LOGGER.debug("Adicionando nova tag: %s", tag_name)
                 new_tag = psm.Tag(name=tag_name)
                 session.add(new_tag)
                 existing_tags[tag_name] = new_tag
 
-            tags.append(existing_tags[tag_name])
+        solved_count = statistics.get((problem['contestId'], problem['index']), 0)
+        tmp = problem
+        problemset_data[i] = {
+            "contestId": tmp.get('contestId'),
+            "index": tmp.get('index'),
+            "problemsetName": tmp.get('problemsetName'),
+            "name": tmp.get('name'),
+            "type": psm.ProblemType[tmp.get('type')],
+            "points": tmp.get('points'),
+            "rating": tmp.get('rating'),
+            "solvedCount": solved_count,
+            "tags": tmp.get('tags', [])
+        }
+        del tmp
 
-        # 4. Checar se existe
-        existing_problem = session.query(psm.Problem).filter_by(
-            contest_id=problem['contestId'],
-            index=problem['index']
-        ).first()
+    del statistics
+    session.flush()
 
-        # 5. Atualizar ou adicionar
-        if existing_problem:
-            # Atualizar campos do problema existente
-            existing_problem.problemset_name = problem.get('problemsetName', None)
-            existing_problem.name = problem['name']
-            existing_problem.type = psm.ProblemType[problem['type']]
-            existing_problem.points = problem.get('points')
-            existing_problem.rating = problem.get('rating')
-            existing_problem.solved_count = statistics.get(key, 0)
-            existing_problem.tags = tags
-        else:
-            # Adicionar novo problema
-            prob = psm.Problem(
-                contest_id=problem['contestId'],
-                problemset_name=problem.get('problemsetName', None),
-                index=problem['index'],
-                name=problem['name'],
-                type=psm.ProblemType[problem['type']],
-                points=problem.get('points'),
-                rating=problem.get('rating'),
-                solved_count=statistics.get(key, 0),
-                tags=tags
-            )
-            session.add(prob)
-        i += 1
+    relationships = []
+    LOGGER.debug("Construindo relacionamentos de tags...")
+    for i, problem in enumerate(problemset_data, start=1):
+        LOGGER.debug(
+            "Processando problema %d/%d para relacionamento de tags",
+            i, len(problemset_data)
+        )
+        for tag_name in problem['tags']:
+            tag = existing_tags[tag_name]
+            relationships.append({
+                "problemContestId": problem['contestId'],
+                "problemIndex": problem['index'],
+                "tagId": tag.id
+            })
+        del problem['tags']  # Remove a lista de tags do problema para não armazenar no banco
 
-    LOGGER.info("Sincronização do problemset concluída.")
+    batch_size = get_max_batch_size(session, psm.Problem)
+    batch_count = (len(problemset_data) // batch_size) + \
+        (1 if len(problemset_data) % batch_size else 0)
+
+    LOGGER.debug("Inserindo/atualizando problemas em lotes de tamanho %d...", batch_size)
+    for i in range(batch_count):
+        start_index = i * batch_size
+        end_index = min((i + 1) * batch_size, len(problemset_data))
+        LOGGER.debug(
+            "Processando lote %d/%d: problemas %d a %d",
+            i + 1, batch_count, start_index + 1, end_index
+        )
+        insert_update(
+            session, psm.Problem, problemset_data[start_index:end_index],
+            index_elements=["contestId", "index"]
+        )
+
+    batch_size = get_max_batch_size(session, psm.ProblemTag)
+    batch_count = len(relationships) // batch_size + \
+        (1 if len(relationships) % batch_size else 0)
+
+    LOGGER.debug("Inserindo relacionamentos de tags em lotes de tamanho %d...", batch_size)
+
+    # Limpando a tabela de relacionamentos antes de inserir os novos dados
+    session.execute(delete(psm.ProblemTag))
+    for i in range(batch_count):
+        start_index = i * batch_size
+        end_index = min((i + 1) * batch_size, len(relationships))
+        LOGGER.debug(
+            "Processando lote %d/%d: relacionamentos de tags %d a %d",
+            i + 1, batch_count, start_index + 1, end_index
+        )
+        session.execute(insert(psm.ProblemTag).values(relationships[start_index:end_index]))
+
+    LOGGER.info(
+        "Sincronização do problemset concluída: %d problemas e %d relacionamentos de tags.",
+        len(problemset_data), len(relationships)
+    )
 
 
 def sync_codeforces_contests(session: Session):
@@ -153,62 +191,57 @@ def sync_codeforces_contests(session: Session):
     response = get(CODEFORCES_CONTESTS_URL, timeout=SYNC_GET_TIMEOUT)
     response.raise_for_status()
     contests_data = response.json()
+    LOGGER.debug("CF status: %s", contests_data['status'])
 
-    total_contests = len(contests_data['result'])
+    contests_data = contests_data['result']
+    total_contests = len(contests_data)
     LOGGER.info("Total de concursos encontrados: %d", total_contests)
-    i = 1
 
     # 2. Montar lista de concursos
     LOGGER.info("Sincronizando concursos...")
-    for contest in contests_data['result']:
+    for i, contest in enumerate(contests_data, start=1):
         LOGGER.debug(
             "Processando concurso %d/%d: %s ID: %d",
             i, total_contests, contest['name'], contest['id']
         )
 
-        # 3. Checar se existe
-        existing_contest = session.query(cm.Contest).filter_by(id=contest['id']).first()
+        tmp = contest
+        contests_data[i-1] = {
+            "id": tmp.get('id'),
+            "name": tmp.get('name'),
+            "type": cm.ContestType[tmp.get('type')],
+            "phase": cm.ContestPhase[tmp.get('phase')],
+            "frozen": tmp.get('frozen'),
+            "duration_seconds": tmp.get('durationSeconds'),
+            "freeze_duration_seconds": tmp.get('freezeDurationSeconds'),
+            "start_time_seconds": tmp.get('startTimeSeconds'),
+            "relative_time_seconds": tmp.get('relativeTimeSeconds'),
+            "prepared_by": tmp.get('preparedBy'),
+            "website_url": tmp.get('websiteUrl'),
+            "description": tmp.get('description'),
+            "difficulty": tmp.get('difficulty'),
+            "kind": tmp.get('kind'),
+            "icpc_region": tmp.get('icpcRegion'),
+            "country": tmp.get('country'),
+            "city": tmp.get('city'),
+            "season": tmp.get('season')
+        }
+        del tmp
 
-        if existing_contest:
-            existing_contest.name = contest['name']
-            existing_contest.type = cm.ContestType[contest['type']]
-            existing_contest.phase = cm.ContestPhase[contest['phase']]
-            existing_contest.frozen = contest['frozen']
-            existing_contest.duration_seconds = contest['durationSeconds']
-            existing_contest.freeze_duration_seconds = contest.get('freezeDurationSeconds')
-            existing_contest.start_time_seconds = contest.get('startTimeSeconds')
-            existing_contest.relative_time_seconds = contest.get('relativeTimeSeconds')
-            existing_contest.prepared_by = contest.get('preparedBy')
-            existing_contest.website_url = contest.get('websiteUrl')
-            existing_contest.description = contest.get('description')
-            existing_contest.difficulty = contest.get('difficulty')
-            existing_contest.kind = contest.get('kind')
-            existing_contest.icpc_region = contest.get('icpcRegion')
-            existing_contest.country = contest.get('country')
-            existing_contest.city = contest.get('city')
-            existing_contest.season = contest.get('season')
-        else:
-            con = cm.Contest(
-                id=contest['id'],
-                name=contest['name'],
-                type=cm.ContestType[contest['type']],
-                phase=cm.ContestPhase[contest['phase']],
-                frozen=contest['frozen'],
-                duration_seconds=contest['durationSeconds'],
-                freeze_duration_seconds=contest.get('freezeDurationSeconds'),
-                start_time_seconds=contest.get('startTimeSeconds'),
-                relative_time_seconds=contest.get('relativeTimeSeconds'),
-                prepared_by=contest.get('preparedBy'),
-                website_url=contest.get('websiteUrl'),
-                description=contest.get('description'),
-                difficulty=contest.get('difficulty'),
-                kind=contest.get('kind'),
-                icpc_region=contest.get('icpcRegion'),
-                country=contest.get('country'),
-                city=contest.get('city'),
-                season=contest.get('season')
-            )
-            session.add(con)
+    batch_size = get_max_batch_size(session, cm.Contest)
+    batch_count = (len(contests_data) // batch_size) + \
+        (1 if len(contests_data) % batch_size else 0)
 
-        i += 1
+    LOGGER.debug("Inserindo/atualizando concursos em lotes de tamanho %d...", batch_size)
+    for i in range(batch_count):
+        start_index = i * batch_size
+        end_index = min((i + 1) * batch_size, len(contests_data))
+        LOGGER.debug(
+            "Processando lote %d/%d: concursos %d a %d",
+            i + 1, batch_count, start_index + 1, end_index
+        )
+        insert_update(
+            session, cm.Contest, contests_data[start_index:end_index],
+            index_elements=["id"]
+        )
     LOGGER.info("Sincronização dos concursos concluída.")
