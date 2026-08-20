@@ -55,7 +55,8 @@ def get_calendar(calendar_id: str):
         cals = [calendar_provider.get_calendar(CALENDARS[calendar_id])]
 
     cals = [{
-        'id': cal.id,
+        'id': calendar_id,
+        'gid': cal.id,
         'name': cal.summary,
         'timezone': cal.time_zone
     } for cal in cals]
