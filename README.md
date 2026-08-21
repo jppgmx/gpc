@@ -62,11 +62,12 @@ O projeto possui dois serviços principais via Docker Compose:
 - **`backend`** (FastAPI) em `:8000` — serve de suporte ao agente, buscando, normalizando
   e servindo documentos e demais dados.
 - **`n8n`** em `:5678` — orquestra o agente de IA (GPC).
+- **`caddy`** — disponível em ambiente de produção e é usado para fazer proxy reverso para o n8n.
 
 ### Agente (n8n)
 
 O GPC é um agente de IA (modelo Cohere) com memória de conversa, acessível via
-chat (local do n8n), com as seguintes ferramentas disponíveis:
+chat (via API do Telegram), com as seguintes ferramentas disponíveis:
 
 - Consulta de status do sistema Codeforces (`system.status`)
 - Busca semântica (RAG) sobre Termos, Privacidade e o aviso de transparência
@@ -129,6 +130,7 @@ o backend pega esses dados, normaliza e cacheia.
 │   │   │   ├── db.py
 │   │   │   ├── document_provider.py
 │   │   │   ├── logging.py
+│   │   │   ├── profiling.py
 │   │   │   ├── secrets.py
 │   │   │   └── worker.py
 │   │   └── main.py
@@ -142,6 +144,8 @@ o backend pega esses dados, normaliza e cacheia.
 │   ├── pyproject.toml
 │   ├── requirements.txt
 │   └── requirements-dev.txt
+├── calibration
+│   └── round-1.md
 ├── scripts
 │   ├── copy_workflows.py
 │   └── envgen.py
@@ -173,6 +177,8 @@ As principais tecnologias e ferramentas usadas neste projeto incluem:
 - psutil (métricas de % de CPU e RAM)
 - n8n (automação/workflows)
 - Docker e Docker Compose
+- Cloudflare Tunnel (para testes localhost)
+- Deploy na Amazon Web Services (AWS)
 - make
 - pylint
 
@@ -182,6 +188,70 @@ As principais tecnologias e ferramentas usadas neste projeto incluem:
 - Docker Compose
 - Python 3.12 (para desenvolvimento local do backend)
 - `make` (opcional, mas recomendado)
+- Se estiver rodando localhost, você precisará criar um túnel usando Cloudflare para criar uma URL pública.
+  É dessa forma que a API do Telegram possa funcionar localmente.
+- Se estiver em ambiente de produção (por exemplo, AWS ou OCI), certifique-se que haja um endereço IP público,
+  de preferência fixo, e um provedor DNS.
+
+### Setup do Túnel Cloudflare
+
+1. Crie ou entre na sua conta do Cloudflare;
+2. Em seu dashboard, vá em **Protect & Connect > Networking > Tunnels**;
+3. Clique em **Create Tunnel**;
+4. Siga as instruções como inserir nome e instalar o cloudflared;
+5. Abra o terminal e digite `cloudflared tunnel --url http://localhost:5678`;
+6. O Cloudflare vai lher dar uma URL a cada execução do cloudflared.
+  ```
+  +--------------------------------------------------------------------------------------------+
+  |  Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):  |
+  |  https://XYZ.trycloudflare.com                                                             |
+  +--------------------------------------------------------------------------------------------+
+  ```
+
+### Setup para produção (sugestão)
+
+Você pode criar uma conta no [Duck DNS](https://www.duckdns.org/), adicionar um nome e associar o IP da instância pública.
+Fica algo como `nome.duckdns.org`, então na etapa da produção, precisará configurar o Caddyfile para apontar para esse
+endereço DNS.
+
+### Antes do Docker subir...
+
+É necessário que seja gerado um arquivo .env para que o n8n assuma um domínio.
+Você pode chamar os comandos make abaixo e responda os prompts para gerar, ou
+pode criar manualmente com base no template abaixo:
+
+```
+# Host
+N8N_HOST=localhost
+N8N_PROTOCOL=http
+N8N_PORT=5678
+
+# URLs
+PUBLIC_URL=http://localhost:5678
+WEBHOOK_URL=http://localhost:5678/
+N8N_EDITOR_BASE_URL=http://localhost:5678
+
+# Timezone
+GENERIC_TIMEZONE=America/Sao_Paulo
+```
+
+O template acima já permite rodar n8n em ambiente local, caso esteja em produção e use
+a sugestão acima:
+
+```
+# Host
+N8N_HOST=nome.duckdns.org
+N8N_PROTOCOL=https
+N8N_PORT=5678
+
+# URLs
+PUBLIC_URL=https://nome.duckdns.org
+WEBHOOK_URL=https://nome.duckdns.org/
+N8N_EDITOR_BASE_URL=https://nome.duckdns.org
+
+# Timezone
+GENERIC_TIMEZONE=America/Sao_Paulo
+```
 
 ## Setup rápido (desenvolvimento)
 
@@ -207,6 +277,8 @@ make pylint
 ```
 
 ## Executando com Docker
+
+- .env é **requerido** para iniciar
 
 Subir tudo:
 
@@ -234,13 +306,15 @@ make stop
 
 Tem também `stop-n8n` e `stop-backend`.
 
-## ou localmente
+## ou caso queira testar apenas o servidor sem Docker
 
 ```bash
 make server
 ```
 
 ## Produção
+
+- .env é **requerido** para iniciar
 
 No make:
 ```bash
@@ -249,17 +323,16 @@ make stop-prod # Para
 ```
 
 Usam a versão `docker-compose.prod.yml`, que é idêntica ao `docker-compose.yml` para n8n e backend,
-apenas é adicionado um contêiner do Caddy para DNS.
+apenas é adicionado um contêiner do Caddy para fazer proxy reverso ao n8n.
 
 ## Notas de inicialização
 
 - Você pode usar a variável de ambiente `LOG_LEVEL` para definir a severidade dos logs;
-- Antes de iniciar, o make gera um .env se não existir com base em valores customizados ou padrão,
-  confira `.env.template`.
+- Garanta que .env esteja devidamente presente.
 
 ## Endpoints do backend
 
-Base local esperada: `http://localhost:8000`
+Base local esperada: `http://localhost:8000` (nos contêineres `http://backend:8000`)
 
 - `GET /health` -> verificação de saúde
 - `GET /docs/terms` -> termos do Codeforces
@@ -306,14 +379,16 @@ Importar workflows:
 make import-workflows
 ```
 
+Note que terá que inserir manualmente quaisquer credenciais usados.
+
 ## Limpeza do ambiente
 
 ```bash
 make clean
 ```
 
-Esse alvo remove virtualenv, cache Python, artefatos egg-info e recursos
-Docker relacionados ao projeto.
+Esse alvo remove virtualenv, cache Python, artefatos egg-info, recursos
+Docker e quaiquer arquivos relacionados ao projeto.
 
 ## Troubleshooting
 
@@ -330,14 +405,13 @@ Docker relacionados ao projeto.
 - [x] Consulta as contests
 - [x] Calendário de contests usando Google Calendar API
 - [x] Adicionar logging para o backend
-- [ ] deploy para AWS
-- [ ] Melhorar em relação ao modelo e RAG¹
+- [x] deploy para AWS
+- [!] Melhorar em relação ao modelo e RAG¹
 - [ ] Busca de enunciados de cada problema
 - [ ] FAQ, via API oficial e blogs do Codeforces
 - [ ] Suporte a dúvidas de programação em C/C++
 
-¹Com a adição do serviço de Calendário e o nodo ferramenta, venho tentando calibrar o uso da ferramenta,
-além de outras otimizações na parte do Vector Store.
+¹A primeira calibração será feita e está em progresso
 
 ## Contato
 
