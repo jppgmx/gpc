@@ -23,7 +23,7 @@ class BasicOptions(BaseModel):
     pretty_datetime: Optional[bool] = Field(
         False,
         description="Se True, retorna a data/hora em formato ISO 8601, " \
-        "caso contrário, juntamente com a data/hora em segundos desde a época Unix," \
+        "juntamente com a data/hora em segundos desde a época Unix," \
         "além do fuso horário aplicado. O padrão é False."
     )
     timezone: Optional[str] = Field(
