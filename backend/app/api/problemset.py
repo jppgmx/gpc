@@ -113,6 +113,22 @@ class FilterParams(BaseModel):
 
         return normalized
 
+    @field_validator("contest_id", "rating", "min_points", "page", "limit", mode="before")
+    @classmethod
+    def zero_to_none(cls, v: int | None):
+        """ Converte 0 em None """
+        if v == 0:
+            return None
+        return v
+
+    @field_validator("q", "index", "tags", "order_by", mode="before")
+    @classmethod
+    def empty_string_to_none(cls, v: str | None):
+        """ Converte string vazia em None """
+        if v == "":
+            return None
+        return v
+
     @field_validator("tags", mode="before")
     @classmethod
     def validate_tags(cls, v: str | None):

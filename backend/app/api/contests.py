@@ -32,6 +32,14 @@ class BasicOptions(BaseModel):
         "Se não fornecido, será usado o fuso horário do calendário do Google."
     )
 
+    @field_validator("timezone", mode="before")
+    @classmethod
+    def empty_string_to_none(cls, value: Optional[str]) -> Optional[str]:
+        """ Converte string vazia em None """
+        if value == "":
+            return None
+        return value
+
 Order = Literal["id"]
 class FilterParams(BasicOptions):
     """ Parâmetros de filtro para a listagem de concursos """
@@ -68,6 +76,22 @@ class FilterParams(BasicOptions):
         description="Número da página de resultados a ser retornada.",
         ge=1
     )
+
+    @field_validator("q", "type", "phase", "order_by", mode="before")
+    @classmethod
+    def empty_string_to_none(cls, value: Optional[str]) -> Optional[str]:
+        """ Converte string vazia em None """
+        if value == "":
+            return None
+        return value
+
+    @field_validator("limit", "page", mode="before")
+    @classmethod
+    def zero_to_none(cls, value: int | None) -> int | None:
+        """ Converte 0 em None """
+        if value == 0:
+            return None
+        return value
 
     @field_validator("order_by", mode="before")
     @classmethod

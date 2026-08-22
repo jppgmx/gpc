@@ -1,4 +1,4 @@
-# Resultado da Primeira Rodada de Calibração do GPC
+# Resultado da Primeira Rodada de Calibração do GPC (A-1)
 
 ---
 

@@ -51,11 +51,12 @@ def get_calendar(calendar_id: str):
 
     if isinstance(CALENDARS[calendar_id], list):
         cals = [calendar_provider.get_calendar(cal_id) for cal_id in CALENDARS[calendar_id]]
+        reverse_mapping = {v: k for k, v in CALENDARS.items() if isinstance(v, str)}
     else:
         cals = [calendar_provider.get_calendar(CALENDARS[calendar_id])]
 
     cals = [{
-        'id': calendar_id,
+        'id': calendar_id if calendar_id != "all" else reverse_mapping.get(cal.id, cal.id),
         'gid': cal.id,
         'name': cal.summary,
         'timezone': cal.time_zone
