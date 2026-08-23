@@ -134,6 +134,11 @@ tree:
 		-I gpc_backend.egg-info \
 		.
 
+# Sync manual de assets para dentro de .data
+sync-assets:
+	mkdir -p $(BACKEND_DIR)/app/.data/.assets
+	cp -rv $(BACKEND_DIR)/assets/* $(BACKEND_DIR)/app/.data/.assets
+
 # Cria venv caso não exista
 $(VENV_DIR):
 	$(PYTHON) -m venv $(VENV_DIR)

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-23T15:31:49.543Z",
+  "updatedAt": "2026-08-23T16:42:01.253Z",
   "createdAt": "2026-08-03T18:38:26.827Z",
   "id": "EfGUhRGM7wMCYnyR",
   "name": "gpc-agent",
@@ -118,7 +118,7 @@
         "url": "=http://backend:8000/api/contests/",
         "sendQuery": true,
         "specifyQuery": "json",
-        "jsonQuery": "={{ \n  JSON.stringify(\n    (() => {\n      const NUMERIC_FIELDS = new Set([\"limit\", \"page\"]);\n      const params = {\n        pretty_datetime: true,\n        timezone: $fromAI(\"timezone\", \"O fuso horário a aplicar.\", \"string\", \"America/Sao_Paulo\"),\n        q: $fromAI(\"q\", \"Procura contests pelo nome.\", \"string\"),\n        type: $fromAI(\"type\", \"Filtra pelo tipo da contest: CF, IOI, ICPC.\", \"string\"),\n        phase: $fromAI(\"phase\", \"Pesquisa pela fase atual da contest: BEFORE, CODING, PENDING_SYSTEM_TEST, SYSTEM_TEST, FINISHED\", \"string\"),\n        order_by: $fromAI(\"order_by\", \"Ordena por campo: id. Use o prefixo - para inverter a ordenação.\"),\n        limit: $fromAI(\"limit\", \"O limite de contests a retornar. Min.: 1, Max.: 100, Padrão: 10\", \"number\"),\n        page: $fromAI(\"page\", \"Use quando tiver mais itens e o usuário queira continuar a pesquisa.\", \"number\")\n      }\n      return Object.fromEntries(\n    Object.entries(params).filter(([key, v]) => {\n      if (v === undefined || v === null || v === \"\") return false;\n      if (NUMERIC_FIELDS.has(key) && v === 0) return false;\n      return true;\n    })\n  );\n    })()\n  )\n}}",
+        "jsonQuery": "={{ \n  JSON.stringify(\n    (() => {\n      const NUMERIC_FIELDS = new Set([\"limit\", \"page\"]);\n      const params = {\n        pretty_datetime: true,\n        timezone: $fromAI(\"timezone\", \"O fuso horário a aplicar.\", \"string\", \"America/Sao_Paulo\"),\n        q: $fromAI(\"q\", \"Procura contests nome/termo específico.\", \"string\"),\n        type: $fromAI(\"type\", \"Filtra pelo tipo da contest: CF, IOI, ICPC.\", \"string\"),\n        phase: $fromAI(\"phase\", \"Pesquisa pela fase atual da contest: BEFORE, CODING, PENDING_SYSTEM_TEST, SYSTEM_TEST, FINISHED\", \"string\"),\n        order_by: $fromAI(\"order_by\", \"Ordena por campo: id. Use o prefixo - para inverter a ordenação.\"),\n        limit: $fromAI(\"limit\", \"O limite de contests a retornar. Min.: 1, Max.: 100, Padrão: 10\", \"number\"),\n        page: $fromAI(\"page\", \"Use quando tiver mais itens e o usuário queira continuar a pesquisa.\", \"number\")\n      }\n      return Object.fromEntries(\n    Object.entries(params).filter(([key, v]) => {\n      if (v === undefined || v === null || v === \"\") return false;\n      if (NUMERIC_FIELDS.has(key) && v === 0) return false;\n      return true;\n    })\n  );\n    })()\n  )\n}}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequestTool",
@@ -141,7 +141,7 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        1648,
+        1616,
         16
       ],
       "id": "74300270-7109-4e27-b3a8-f1707331fe43",
@@ -184,7 +184,7 @@
       "typeVersion": 1.2,
       "position": [
         2384,
-        -16
+        0
       ],
       "id": "17ccf5aa-b3e5-499d-bc44-55f2dfe254c6",
       "name": "Send a text message",
@@ -311,7 +311,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1936,
+        2000,
         -144
       ],
       "id": "9859030b-8e9e-4c34-bf84-a68f3fb4767f",
@@ -581,9 +581,9 @@
   },
   "nodeGroups": [],
   "pinData": {},
-  "versionId": "63c41a11-f755-4fae-bc76-171e63cb38f2",
+  "versionId": "f9c72a83-a9ca-403f-ae08-6b4d649091a3",
   "activeVersionId": null,
-  "versionCounter": 1222,
+  "versionCounter": 1227,
   "triggerCount": 1,
   "sourceWorkflowId": null,
   "tags": [],
