@@ -100,14 +100,15 @@ o backend pega esses dados, normaliza e cacheia.
 ## Estrutura do repositório
 
 ```text
-.
+gpc
 ├── backend
 │   ├── app
 │   │   ├── api
 │   │   │   ├── calendar.py
 │   │   │   ├── contests.py
 │   │   │   ├── docs.py
-│   │   │   └── problemset.py
+│   │   │   ├── problemset.py
+│   │   │   └── tags.py
 │   │   ├── models
 │   │   │   ├── mdconvs
 │   │   │   │   └── privacy.py
@@ -138,6 +139,8 @@ o backend pega esses dados, normaliza e cacheia.
 │   │   ├── docs
 │   │   │   ├── disclaimer.md
 │   │   │   ├── privacy.md
+│   │   │   ├── system_message.md
+│   │   │   ├── tags.json
 │   │   │   └── terms.md
 │   │   └── README.md
 │   ├── Dockerfile
@@ -145,7 +148,6 @@ o backend pega esses dados, normaliza e cacheia.
 │   ├── requirements.txt
 │   └── requirements-dev.txt
 ├── calibration
-│   └── round-1.md
 ├── scripts
 │   ├── copy_workflows.py
 │   └── envgen.py
@@ -253,6 +255,8 @@ N8N_EDITOR_BASE_URL=https://nome.duckdns.org
 GENERIC_TIMEZONE=America/Sao_Paulo
 ```
 
+(**Obs.:** No Cloudflare, apenas especifica o domínio, pois sempre ele vai refletir a porta 5678 do localhost.)
+
 ## Setup rápido (desenvolvimento)
 
 Com `make`:
@@ -338,12 +342,14 @@ Base local esperada: `http://localhost:8000` (nos contêineres `http://backend:8
 - `GET /docs/terms` -> termos do Codeforces
 - `GET /docs/privacy` -> política de privacidade
 - `GET /docs/disclaimer` -> aviso local do projeto
+- `GET /docs/system_message` -> mensagem do sistema do agente
 - `GET /api/calendar/primary` -> calendário "Programming Contests Calendar"
 - `GET /api/calendar/misc` -> calendário "Misc Codeforces Calendar"
 - `GET /api/calendar/all` -> todos os calendários
 - `GET /api/calendar/{calendário}/events` -> eventos do calendário especificado
 - `GET /api/problemset/problems` -> todos os problemas do Codeforces
 - `GET /api/problemset/problems/{id¹}` -> um problema do Codeforces
+- `GET /api/problemset/tags` -> todas as tags do Codeforces
 - `GET /api/contests` -> todas as contests do Codeforces
 - `GET /api/contests/{id²}` -> uma contest (ou concurso, se traduzir literalmente) do Codeforces
 
@@ -406,12 +412,16 @@ Docker e quaiquer arquivos relacionados ao projeto.
 - [x] Calendário de contests usando Google Calendar API
 - [x] Adicionar logging para o backend
 - [x] deploy para AWS
-- [!] Melhorar em relação ao modelo e RAG¹
+- [99.9%] Calibração do agente¹
+- [ ] Migrar para um modelo maior
 - [ ] Busca de enunciados de cada problema
 - [ ] FAQ, via API oficial e blogs do Codeforces
 - [ ] Suporte a dúvidas de programação em C/C++
 
-¹A primeira calibração será feita e está em progresso
+¹ A calibração foi feita com base no `calibration/round-1.md` e o processo é, para cada bloco:
+1. Fazer o teste;
+2. Anotar o fluxo interno, resultados e opinião;
+3. Se houve problemas/imprecisões, faz a calibração e refaça os testes com problemas.
 
 ## Contato
 
