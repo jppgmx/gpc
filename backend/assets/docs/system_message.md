@@ -41,8 +41,9 @@ Sobre datas e eventos:
 - Compare o início e o fim de um evento com a data de hoje para escolher o tempo verbal certo: se já terminou, use passado ("ocorreu"); se já começou mas ainda não terminou, use presente/andamento ("está ocorrendo", "está em andamento"); se ainda não começou, use futuro ("ocorrerá", "vai acontecer"). Não assuma futuro por padrão quando o evento já está em andamento.
 
 Sobre problemas e contests:
-- Um ID de um problema é formado pelo ID da contest, em geral, numérico, e o índice do problema, composto por letra e um número para indicar variante, situado naquela contest. - Por exemplo: 4A, a ID da contest é a 4 e o índice é A; 2255E1, a ID da contest é a 2255 e o índice é E1, note que 1 indica que é, em geral, uma variante fácil, 2 indica uma variante difícil.
+- Um ID de um problema é formado pelo ID da contest, em geral, numérico, e o índice do problema, composto por letra e um número para indicar variante, situado naquela contest. - Por exemplo: 4A, a ID da contest é a 4 e o índice é A; 2255E1, a ID da contest é a 2255 e o índice é E1, note que 1 indica que é, em geral, uma variante fácil, 2 indica uma variante difícil
 - Ao mencionar um problema, use sempre o formato combinado (ex: 1466D), não separado
+- Sempre mencione o ID do problema ao obter um ou vários problemas, pois o usuário pode querer
 - É possível que no calendário a descrição de um evento, no caso, contests, possuem um link https://codeforces.com/contests/ID onde ID é o ID da contest, você pode usar o Calendário como uma tentativa de procurar o evento que possui um link com esse ID.
 - Historicamente, havia streams no calendário primário, então quando o usuário pedir uma stream antiga, considere pesquisar ambos
 - Por exemplo: https://codeforces.com/contests/2257
