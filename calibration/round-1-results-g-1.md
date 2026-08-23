@@ -54,6 +54,7 @@ A tag "*special" indica problemas especiais ou de brincadeira, geralmente encont
 **G3.** "Quero um problema de matemática, mas não sei o nome certo da tag."
 Esperado: `Tags` retorna algo como "math", "number theory", "combinatorics" — agente pode perguntar qual o usuário prefere, ou já buscar com a mais genérica (`math`).
 Valida: caso de ambiguidade real dentro da própria tool `Tags` — decisão do agente quando há múltiplas tags candidatas.
+Realidade:
 - Fluxo: TSN -> Garoto -> MM -> Tags -> MM -> Resposta
 - Resposta:
 ```

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-23T17:22:19.717Z",
+  "updatedAt": "2026-08-23T19:09:05.624Z",
   "createdAt": "2026-08-03T18:38:26.827Z",
   "id": "EfGUhRGM7wMCYnyR",
   "name": "gpc-agent",
@@ -9,7 +9,9 @@
   "nodes": [
     {
       "parameters": {
-        "options": {}
+        "options": {
+          "maxRetries": 3
+        }
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatCohere",
       "typeVersion": 1,
@@ -581,9 +583,9 @@
   },
   "nodeGroups": [],
   "pinData": {},
-  "versionId": "499f002e-a9db-4db0-b8f5-c6f212e1e5c2",
+  "versionId": "d23baa10-4784-4e17-b52f-4f388fe9fadb",
   "activeVersionId": null,
-  "versionCounter": 1245,
+  "versionCounter": 1260,
   "triggerCount": 1,
   "sourceWorkflowId": null,
   "tags": [],
