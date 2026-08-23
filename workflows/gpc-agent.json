@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-23T10:48:53.475Z",
+  "updatedAt": "2026-08-23T15:31:49.543Z",
   "createdAt": "2026-08-03T18:38:26.827Z",
   "id": "EfGUhRGM7wMCYnyR",
   "name": "gpc-agent",
@@ -14,8 +14,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatCohere",
       "typeVersion": 1,
       "position": [
-        920,
-        344
+        928,
+        256
       ],
       "id": "31239c39-1ef5-440a-bcfa-b679f80a0f37",
       "name": "Cohere Chat Model",
@@ -34,8 +34,8 @@
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.4,
       "position": [
-        1048,
-        344
+        1056,
+        256
       ],
       "id": "e2bc009b-c865-420e-9dea-e2cbc8d2a55d",
       "name": "Simple Memory"
@@ -47,8 +47,8 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
       "typeVersion": 1,
       "position": [
-        1384,
-        552
+        1392,
+        464
       ],
       "id": "0c9e7be8-762e-48e9-8974-4c877897dd0d",
       "name": "Embeddings Cohere",
@@ -68,8 +68,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        1176,
-        344
+        1184,
+        256
       ],
       "id": "65bcad99-fbd6-4dbb-b7c1-4b9990b72417",
       "name": "CF System Status"
@@ -88,8 +88,8 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
       "typeVersion": 1.3,
       "position": [
-        1304,
-        344
+        1312,
+        256
       ],
       "id": "a849f32d-cf0a-4896-8888-6cdd04092e43",
       "name": "Documents Vector Store"
@@ -106,8 +106,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        1592,
-        344
+        1600,
+        256
       ],
       "id": "cf7a0d71-f754-42e3-9840-10ef5c5845df",
       "name": "Problemset"
@@ -124,8 +124,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        1720,
-        344
+        1728,
+        256
       ],
       "id": "0658348a-f70b-414b-bb19-1afdc4407092",
       "name": "Contests"
@@ -142,10 +142,11 @@
       "typeVersion": 3.1,
       "position": [
         1648,
-        112
+        16
       ],
       "id": "74300270-7109-4e27-b3a8-f1707331fe43",
-      "name": "Garoto"
+      "name": "Garoto",
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -157,8 +158,8 @@
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1.5,
       "position": [
-        240,
-        -80
+        896,
+        -160
       ],
       "id": "95c55f02-d7e0-4b05-b09b-678750dc2336",
       "name": "Telegram Trigger",
@@ -182,8 +183,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        2560,
-        -80
+        2384,
+        -16
       ],
       "id": "17ccf5aa-b3e5-499d-bc44-55f2dfe254c6",
       "name": "Send a text message",
@@ -207,8 +208,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        1848,
-        344
+        1856,
+        256
       ],
       "id": "c8e89c3f-e2b6-44b1-a5ef-94a81de3237f",
       "name": "Events"
@@ -222,8 +223,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        1976,
-        344
+        1984,
+        256
       ],
       "id": "c5795ea6-eb13-4714-a16f-7cc190bbd905",
       "name": "Calendar"
@@ -241,8 +242,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        2104,
-        344
+        2112,
+        256
       ],
       "id": "0db0be22-2c46-4d65-8e2f-a244a0505cb1",
       "name": "Problem"
@@ -256,8 +257,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        2232,
-        344
+        2240,
+        256
       ],
       "id": "731da579-6bc8-4143-b52e-e5e3bbc0c4f3",
       "name": "Tags"
@@ -284,11 +285,37 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        2360,
-        344
+        2368,
+        256
       ],
       "id": "1566bd2e-11ca-4de9-bfd1-60dab5da4f53",
       "name": "Contest"
+    },
+    {
+      "parameters": {
+        "jsCode": "let data = $input.first().json.data\n\nreturn [\n  {\n    json: {\n      data: data.replace(\"{{TODAY}}\", $now.toFormat('yyyy-MM-dd'))\n    }\n  }\n]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1376,
+        16
+      ],
+      "id": "0e78e030-65f1-4711-99e2-57db9a3171e8",
+      "name": "Normalize"
+    },
+    {
+      "parameters": {
+        "jsCode": "const error = $input.first().json.error\nconsole.log(\"Erro ao obter a mensagem do sistema: \" + error.message)\nconsole.log(error)\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1936,
+        -144
+      ],
+      "id": "9859030b-8e9e-4c34-bf84-a68f3fb4767f",
+      "name": "Report"
     },
     {
       "parameters": {
@@ -298,11 +325,11 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        464,
-        -80
+        1120,
+        -160
       ],
       "id": "a5efffec-50ac-4dce-bb14-8f89ef794894",
-      "name": "HTTP Request",
+      "name": "System Message",
       "onError": "continueErrorOutput"
     },
     {
@@ -322,37 +349,11 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.5,
       "position": [
-        1632,
-        -288
+        2160,
+        -144
       ],
       "id": "4b7265e8-9480-443c-9cf5-bb5a52d35ac9",
-      "name": "Edit Fields"
-    },
-    {
-      "parameters": {
-        "jsCode": "let data = $input.first().json.data\n\nreturn [\n  {\n    json: {\n      data: data.replace(\"{{TODAY}}\", $now.toFormat('yyyy-MM-dd'))\n    }\n  }\n]"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        688,
-        112
-      ],
-      "id": "0e78e030-65f1-4711-99e2-57db9a3171e8",
-      "name": "Normalize"
-    },
-    {
-      "parameters": {
-        "jsCode": "const error = $input.first().json.error\nconsole.log(\"Erro ao obter a mensagem do sistema: \" + error.message)\nconsole.log(error)\n\nreturn $input.all();"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        688,
-        -288
-      ],
-      "id": "9859030b-8e9e-4c34-bf84-a68f3fb4767f",
-      "name": "Report"
+      "name": "Fallback Message"
     }
   ],
   "connections": {
@@ -437,7 +438,7 @@
       "main": [
         [
           {
-            "node": "HTTP Request",
+            "node": "System Message",
             "type": "main",
             "index": 0
           }
@@ -449,6 +450,13 @@
         [
           {
             "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Report",
             "type": "main",
             "index": 0
           }
@@ -510,7 +518,29 @@
         ]
       ]
     },
-    "HTTP Request": {
+    "Normalize": {
+      "main": [
+        [
+          {
+            "node": "Garoto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Report": {
+      "main": [
+        [
+          {
+            "node": "Fallback Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "System Message": {
       "main": [
         [
           {
@@ -528,33 +558,11 @@
         ]
       ]
     },
-    "Edit Fields": {
+    "Fallback Message": {
       "main": [
         [
           {
             "node": "Send a text message",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Normalize": {
-      "main": [
-        [
-          {
-            "node": "Garoto",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Report": {
-      "main": [
-        [
-          {
-            "node": "Edit Fields",
             "type": "main",
             "index": 0
           }
@@ -573,9 +581,9 @@
   },
   "nodeGroups": [],
   "pinData": {},
-  "versionId": "ede5872a-03c4-475e-b4a6-3da73a773c14",
+  "versionId": "63c41a11-f755-4fae-bc76-171e63cb38f2",
   "activeVersionId": null,
-  "versionCounter": 1215,
+  "versionCounter": 1222,
   "triggerCount": 1,
   "sourceWorkflowId": null,
   "tags": [],

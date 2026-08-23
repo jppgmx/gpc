@@ -29,6 +29,21 @@
 }}
 ```
 
+- O System Message agora está em um arquivo e é feito HTTP Request:
+1. Trigger dispara;
+2. Obtém SysMsg;
+3. Se tudo certo, normaliza para injetar dados e passa ao agente;
+4. Caso contrário, reporta e manda uma mensagem de fallback;
+- Ajustes no em /api/problemset/tags
+
+---
+
+# Nomenclaturas:
+- `TSN`: Trigger -> System Message -> Normalize
+- `TSR`: Trigger -> System Message -> Report -> Message Fallback
+- `MF`: Message Fallback
+- `MM`: Memória -> Modelo
+
 ---
 
 ### C. Ambíguas entre duas tools (4)
@@ -37,7 +52,7 @@
 Esperado: `Events` com `q=Huawei`, sem `start`/`end` (regressão do bug já corrigido).
 Valida: **caso de regressão conhecido** — já quebrou antes por empilhar filtro de data desnecessário.
 Realidade:
-- Fluxo: Trigger -> Garoto -> MM (Memória e Modelo) -> Events -> MM -> Resposta
+- Fluxo: (Versão legada) Trigger -> Garoto -> MM (Memória e Modelo) -> Events -> MM -> Resposta
 - Events:
     - URL: http://backend:8000/api/calendar/primary/events
     - Params: {"q":"Huawei","start":"2026-08-22T00:00:00Z","end":"2026-08-22T23:59:59Z","order_by":"startTime",
@@ -78,12 +93,127 @@ Sim, há um evento recente da Huawei:
 Esperado: `Tags` primeiro (buscar nome exato), depois `Problemset` com `tags=chinese remainder theorem`.
 Valida: encadeamento de duas tools em sequência — o motivo de termos criado a tool `Tags`.
 Realidade:
-- Fluxo: 
+- Fluxo: TSN -> Garoto -> MM -> Tags -> MM -> Problemset -> MM -> Resposta
+- Tags:
+  - Retorno:
+  ```json
+  {
+    "count": 38,
+    "tags": [
+      {
+        "name": "data structures",
+        "description": "Estruturas de dados (Heaps, Árvores de Segmentos, Fenwick Trees, etc)."
+      },
+      ...,
+      {
+        "name": "string suffix structures",
+        "description": "Estruturas de dados avançadas para sufixos de strings (Suffix Array, Suffix Automaton, Suffix Tree)."
+      },
+      {
+        "name": "chinese remainder theorem",
+        "description": "Teorema Chinês do Resto (CRT), utilizado em sistemas de congruências modulares simultâneas."
+      },
+      {
+        "name": "*special",
+        "description": "Problemas especiais ou de brincadeira, comuns em concursos de Primeiro de Abril (April Fools)."
+      },
+      ...,
+      {
+        "name": "meet-in-the-middle",
+        "description": "Técnica 'Meet-in-the-Middle', que divide o espaço de busca complexo ao meio, resolve ambas as partes e as combina."
+      }
+    ]
+  }
+  ```
+- Problemset:
+  - Input: `{"tags":"chinese remainder theorem","limit":100,"page":1}`
+  - Retorno:
+  ```json
+  {
+    "total": 25,
+    "page": 1,
+    "limit": 100,
+    "problems": [
+      {
+        "contestId": 2097,
+        "index": "C",
+        "name": "Bermuda Triangle",
+        "type": "PROGRAMMING",
+        "points": 1500,
+        "rating": 2400,
+        "solvedCount": 1056,
+        "tags": [
+          "implementation",
+          "math",
+          "number theory",
+          "geometry",
+          "chinese remainder theorem"
+        ]
+      },
+      {
+        "contestId": 1266,
+        "index": "A",
+        "name": "Competitive Programmer",
+        "type": "PROGRAMMING",
+        "points": 500,
+        "rating": 1000,
+        "solvedCount": 17827,
+        "tags": [
+          "math",
+          "chinese remainder theorem"
+        ]
+      },
+      {
+        "contestId": 919,
+        "index": "E",
+        "name": "Congruence Equation",
+        "type": "PROGRAMMING",
+        "points": 2000,
+        "rating": 2100,
+        "solvedCount": 2572,
+        "tags": [
+          "math",
+          "number theory",
+          "chinese remainder theorem"
+        ]
+      },
+      ...
+    ]
+  }
+  ```
 - Resposta:
 ```
+Aqui estão alguns problemas relacionados ao Teorema Chinês do Resto:
 
+1. Bermuda Triangle (2097C)
+2. Competitive Programmer (1266A)
+3. Congruence Equation (919E)
+4. ConstructOR (1748D)
+5. Cyclic Cipher (722F)
+6. Decypher the String (1117E)
+7. Dyn-scripted Robot (Easy Version) (1993F1)
+8. Dyn-scripted Robot (Hard Version) (1993F2)
+9. Engineer Artem (1438C)
+10. Epic Convolution (1054H)
+11. GCD Guess (1665D)
+12. GCD Table (338D)
+13. Game of Scientists (Version 1) (2174E1)
+14. Game of Scientists (Version 2) (2174E2)
+15. Grid Covering (2217C)
+16. King Keykhosrow's Mystery (2034A)
+17. Koxia and Number Theory (1770C)
+18. Nephren Runs a Cinema (896D)
+19. Nikita and Order Statistics (993E)
+20. Omkar and Akmar (1536F)
+21. Power Tower (906D)
+22. RGB Walking (2077G)
+23. Remainders Game (687B)
+24. Two chandeliers (1500B)
+25. Zhily and Signpost (2223C)
+
+Esses problemas envolvem o uso do Teorema Chinês do Resto para resolver sistemas de congruências modulares simultâneas.
 ```
-- Opinião: 
+- Opinião: Respondeu bem, se fosse para detalhar, o usuário pediria, e fez uma boa associação entre Problemset <-> Tags 
 
 **C3.** "Tem contest ICPC ativa agora?"
 Esperado: `Contests` com `type=ICPC`/`phase=CODING` (fase é o diferencial dessa tool) — não `Events`.

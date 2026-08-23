@@ -26,7 +26,7 @@ def get_tags():
     with get_db_session() as session:
         tags = session.query(Tag).all()
 
-    descs = load_tags_descriptions()
+    descs = load_tags_descriptions().get("tags", {})
     return {
         "count": len(tags),
         "tags": [
