@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-22T14:06:00.926Z",
+  "updatedAt": "2026-08-23T10:48:53.475Z",
   "createdAt": "2026-08-03T18:38:26.827Z",
   "id": "EfGUhRGM7wMCYnyR",
   "name": "gpc-agent",
@@ -14,8 +14,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatCohere",
       "typeVersion": 1,
       "position": [
-        480,
-        80
+        920,
+        344
       ],
       "id": "31239c39-1ef5-440a-bcfa-b679f80a0f37",
       "name": "Cohere Chat Model",
@@ -29,13 +29,13 @@
     {
       "parameters": {
         "sessionIdType": "customKey",
-        "sessionKey": "={{ $json.message.chat.id }}"
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
       },
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.4,
       "position": [
-        608,
-        80
+        1048,
+        344
       ],
       "id": "e2bc009b-c865-420e-9dea-e2cbc8d2a55d",
       "name": "Simple Memory"
@@ -47,8 +47,8 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
       "typeVersion": 1,
       "position": [
-        944,
-        288
+        1384,
+        552
       ],
       "id": "0c9e7be8-762e-48e9-8974-4c877897dd0d",
       "name": "Embeddings Cohere",
@@ -68,8 +68,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        736,
-        80
+        1176,
+        344
       ],
       "id": "65bcad99-fbd6-4dbb-b7c1-4b9990b72417",
       "name": "CF System Status"
@@ -88,8 +88,8 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
       "typeVersion": 1.3,
       "position": [
-        864,
-        80
+        1304,
+        344
       ],
       "id": "a849f32d-cf0a-4896-8888-6cdd04092e43",
       "name": "Documents Vector Store"
@@ -106,8 +106,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        1152,
-        80
+        1592,
+        344
       ],
       "id": "cf7a0d71-f754-42e3-9840-10ef5c5845df",
       "name": "Problemset"
@@ -124,8 +124,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        1280,
-        80
+        1720,
+        344
       ],
       "id": "0658348a-f70b-414b-bb19-1afdc4407092",
       "name": "Contests"
@@ -133,16 +133,16 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "={{ $json.message.text }}",
+        "text": "={{ $('Telegram Trigger').item.json.message.text }}",
         "options": {
-          "systemMessage": "=Você é o GPC (Garoto de Programa Competitivo), um assistente de IA especializado em ajudar usuários a navegar a plataforma Codeforces.\n\nIdentidade e transparência:\n- Você NÃO é afiliado, endossado ou mantido pelo Codeforces. É um projeto pessoal e independente.\n- Na primeira mensagem de uma conversa nova, apresente-se brevemente e deixe claro que é um assistente não-oficial que pode cometer erros.\n- Se o usuário perguntar sobre sua natureza, afiliação, ou confiabilidade, use a informação do disclaimer para responder com transparência total.\n\nSeu escopo:\n- Explicar regras, diretrizes conforme os Termos e Condições e a Política de Privacidade\n- Avisar sobre quaisquer mudanças no sistema da plataforma\n- Informar sobre calendário de contests, tipo e fase atual\n- Ajudar a buscar problemas do banco de questões por rating/tag, nome, contests e demais filtros\n- Dar suporte a dúvidas de programação em C/C++ (WIP)\n\nRegras:\n- Se não souber algo com certeza, diga que não sabe em vez de inventar uma resposta\n- Para questões sobre termos de uso, política de privacidade ou regras oficiais, sempre recomende que o usuário confira a fonte oficial do Codeforces, já que você pode estar desatualizado\n- Respostas objetivas, sem enrolação\n- Responda sempre em português, a menos que o usuário escreva em outro idioma\n- Você pode fazer até três tentativas para obter uma resposta de uma tool em caso de erro, após isso, continua o trabalho mesmo assim, avisando ao usuário que não conseguiu obter os dados, ao invés de inventar\n- Palavras como \"FINISHED\", \"CODING\", \"CF\", \"PENDING_SYSTEM_TEST\", \"PROGRAMMING\" e outros, tente traduzir/naturalizar esses termos e demais (Ex.: Terminado, \"Codando\", Codeforces, Testes do Sistema Pendente)\n- Tools do tipo Http Request deve omitir query params desnecessários e que não é de interesse para alcançar a resposta para o usuário.\n\nSobre documentos:\n- Os documentos do CodeForces podem estar no idioma inglês, então:\n  - Termos e Condições (ou Termos): \"Terms and Conditions\";\n  - Política de Privacidade: \"Privacy Policy\";\n- Analise as informações com cautela\n\nSobre datas e eventos:\n- Ao interpretar perguntas sobre contests/eventos, assuma que o usuário se refere a eventos futuros ou em andamento, a menos que ele peça explicitamente por histórico ou eventos passados.\n- \"recente\", \"próximo\", \"que vem aí\" geralmente significam eventos futuros nesse contexto — não passados.\n- Perguntas sobre se um contest \"já aconteceu\", \"terminou\", ou \"está em andamento\" devem preferir a ferramenta Contests (campo phase), não Events — Events só tem data/hora, não status de conclusão.\n- Ao fazer busca por nome/texto (q), evite adicionar filtro de data a menos que o usuário mencione um período específico.\n- Sempre diga a data/hora do evento, o fuso horário se necessário.\n- O limite de eventos a buscar é de, no mínimo, 1, no máximo, 100 eventos.\n- Dependendo da pesquisa, se tiver mais eventos do que o limite especificado, pergunta se quer continuar a pesquisa.\n- Argumentos de entrada para filtros de início e fim devem estrar no formato RFC 3339 (YYYY-MM-DDTHH:MM:SSZ ou YYYY-MM-DDTHH:MM:SS+-TT:TT).\n\nSobre problemas e contests:\n- Um ID de um problema é formado pelo ID da contest, em geral, numérico, e o índice do problema, composto por letra e um número para indicar variante, situado naquela contest. - Por exemplo: 4A, a ID da contest é a 4 e o índice é A; 2255E1, a ID da contest é a 2255 e o índice é E1, note que 1 indica que é, em geral, uma variante fácil, 2 indica uma variante difícil.\n- Ao mencionar um problema, use sempre o formato combinado (ex: 1466D), não separado\n- É possível que no calendário a descrição de um evento, no caso, contests, possuem um link https://codeforces.com/contests/ID onde ID é o ID da contest, você pode usar o Calendário como uma tentativa de procurar o evento que possui um link com esse ID.\n- Historicamente, havia streams no calendário primário, então quando o usuário pedir uma stream antiga, considere pesquisar ambos\n- Por exemplo: https://codeforces.com/contests/2257\n- Para contests, você possui duas ferramentas, ambas falam de data/hora, mas o calendário traz mais detalhes do horário e Contests permite identificar a fase atual\n- Você pode montar links para o problema usando o template https://codeforces.com/problemset/problem/CONTEST_ID/INDICE\n- Ao listar múltiplos itens retornados por uma ferramenta (contests, problemas, eventos), inclua TODOS os itens da resposta da ferramenta, sem omitir nenhum, mesmo que a lista seja longa.\n\nContexto:\n- Hoje é {{$now.format('yyyy-MM-dd')}}"
+          "systemMessage": "={{ $json.data }}"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        1200,
-        -160
+        1648,
+        112
       ],
       "id": "74300270-7109-4e27-b3a8-f1707331fe43",
       "name": "Garoto"
@@ -158,7 +158,7 @@
       "typeVersion": 1.5,
       "position": [
         240,
-        -160
+        -80
       ],
       "id": "95c55f02-d7e0-4b05-b09b-678750dc2336",
       "name": "Telegram Trigger",
@@ -182,8 +182,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        2112,
-        -160
+        2560,
+        -80
       ],
       "id": "17ccf5aa-b3e5-499d-bc44-55f2dfe254c6",
       "name": "Send a text message",
@@ -200,45 +200,15 @@
         "toolDescription": "Busca eventos do calendário de contests ou de streams/discussões do Codeforces. Use para responder perguntas sobre próximos contests, eventos em um período específico com início e fim, no formato completo do RFC 3339, ou busca por nome de contest/evento (ex: \"Huawei\", \"ICPC\", \"Round\", \"CF R\"). Também permite ordenação.",
         "url": "=http://backend:8000/api/calendar/{{ $fromAI(\"calendar_id\", \"primary para contests oficiais, misc para streams/discussões\", \"string\") }}/events",
         "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "q",
-              "value": "={{ $fromAI(\"q\", \"Termo de busca textual livre para filtrar eventos por nome/descrição\", \"string\") }}"
-            },
-            {
-              "name": "start",
-              "value": "={{ $fromAI(\"start\", \"Data de início do intervalo (RFC 3339). Deixe vazio se o usuário não mencionar um período específico — buscas por nome/texto (q) já cobrem todos os períodos automaticamente\", \"string\") }}"
-            },
-            {
-              "name": "end",
-              "value": "={{ $fromAI(\"end\", \"Data de término do intervalo (RFC 3339). Deixe vazio se o usuário não mencionar um período específico\", \"string\") }}"
-            },
-            {
-              "name": "order_by",
-              "value": "={{ $fromAI(\"order_by\", \"startTime para ordenar por data do evento, updated para última modificação\", \"string\") }}"
-            },
-            {
-              "name": "limit",
-              "value": "={{ $fromAI(\"limit\", \"Número máximo de eventos a retornar.\", \"number\") }}"
-            },
-            {
-              "name": "timezone",
-              "value": "America/Sao_Paulo"
-            },
-            {
-              "name": "page",
-              "value": "={{ $fromAI(\"page\", \"A página a procurar na pesquisa, caso haja mais itens acima do limite.\", \"number\") }}"
-            }
-          ]
-        },
+        "specifyQuery": "json",
+        "jsonQuery": "={{\n  JSON.stringify(\n      (() => {\n        const NUMERIC_FIELDS = new Set([\"limit\", \"page\"])\n        const params = {\n          q: $fromAI(\"q\", \"Termo de busca textual livre para filtrar eventos por nome/descrição\", \"string\"),\n          start: $fromAI(\"start\", \"Data de início do intervalo (RFC 3339). Deixe vazio se o usuário não mencionar um período específico — buscas por nome/texto (q) já cobrem todos os períodos automaticamente\", \"string\"),\n          end: $fromAI(\"end\", \"Data de término do intervalo (RFC 3339). Deixe vazio se o usuário não mencionar um período específico\", \"string\"),\n          order_by: $fromAI(\"order_by\", \"startTime para ordenar por data do evento, updated para última modificação\", \"string\"),\n          timezone: \"America/Sao_Paulo\",\n          limit: $fromAI(\"limit\", \"Número máximo de eventos a retornar (1-100).\", \"number\"),\n          page: $fromAI(\"page\", \"A página a procurar na pesquisa, caso haja mais itens acima do limite.\", \"number\")\n        }\n  \n        return Object.fromEntries(\n          Object.entries(params).filter(([key, v]) => {\n            if (v === undefined || v === null || v === \"\") return false;\n            if (NUMERIC_FIELDS.has(key) && v === 0) return false;\n            return true;\n          })\n        )\n      })()\n    )\n}}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        1408,
-        80
+        1848,
+        344
       ],
       "id": "c8e89c3f-e2b6-44b1-a5ef-94a81de3237f",
       "name": "Events"
@@ -252,8 +222,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        1536,
-        80
+        1976,
+        344
       ],
       "id": "c5795ea6-eb13-4714-a16f-7cc190bbd905",
       "name": "Calendar"
@@ -271,8 +241,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        1664,
-        80
+        2104,
+        344
       ],
       "id": "0db0be22-2c46-4d65-8e2f-a244a0505cb1",
       "name": "Problem"
@@ -286,8 +256,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        1792,
-        80
+        2232,
+        344
       ],
       "id": "731da579-6bc8-4143-b52e-e5e3bbc0c4f3",
       "name": "Tags"
@@ -314,11 +284,75 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        1920,
-        80
+        2360,
+        344
       ],
       "id": "1566bd2e-11ca-4de9-bfd1-60dab5da4f53",
       "name": "Contest"
+    },
+    {
+      "parameters": {
+        "url": "http://backend:8000/docs/system_message",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        464,
+        -80
+      ],
+      "id": "a5efffec-50ac-4dce-bb14-8f89ef794894",
+      "name": "HTTP Request",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7c302caa-f5c4-43b3-b73a-e6ba1932ca44",
+              "name": "output",
+              "value": "Desculpe, estou com dificuldades técnicas no momento. Tente novamente em instantes 🙁",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1632,
+        -288
+      ],
+      "id": "4b7265e8-9480-443c-9cf5-bb5a52d35ac9",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "let data = $input.first().json.data\n\nreturn [\n  {\n    json: {\n      data: data.replace(\"{{TODAY}}\", $now.toFormat('yyyy-MM-dd'))\n    }\n  }\n]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        112
+      ],
+      "id": "0e78e030-65f1-4711-99e2-57db9a3171e8",
+      "name": "Normalize"
+    },
+    {
+      "parameters": {
+        "jsCode": "const error = $input.first().json.error\nconsole.log(\"Erro ao obter a mensagem do sistema: \" + error.message)\nconsole.log(error)\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        -288
+      ],
+      "id": "9859030b-8e9e-4c34-bf84-a68f3fb4767f",
+      "name": "Report"
     }
   ],
   "connections": {
@@ -403,7 +437,7 @@
       "main": [
         [
           {
-            "node": "Garoto",
+            "node": "HTTP Request",
             "type": "main",
             "index": 0
           }
@@ -475,6 +509,57 @@
           }
         ]
       ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize": {
+      "main": [
+        [
+          {
+            "node": "Garoto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Report": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -488,9 +573,9 @@
   },
   "nodeGroups": [],
   "pinData": {},
-  "versionId": "f6699c32-1488-4f2a-af5d-51269380e681",
+  "versionId": "ede5872a-03c4-475e-b4a6-3da73a773c14",
   "activeVersionId": null,
-  "versionCounter": 1068,
+  "versionCounter": 1215,
   "triggerCount": 1,
   "sourceWorkflowId": null,
   "tags": [],

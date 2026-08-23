@@ -95,6 +95,16 @@ provider.add_source(
     )
 )
 
+# Documento 'system_message' - Mensagem do sistema
+provider.add_source(
+    source=CacheSource(
+        document_id="system_message",
+        cached_file=data_store.allocate_file(".assets", "docs", "system_message.md"),
+        cache_lifetime=None,
+        data_store=data_store
+    )
+)
+
 @router.get("/terms", response_class=PlainTextResponse)
 def get_terms():
     """Endpoint para obter os Termos e Condições do Codeforces"""
@@ -126,6 +136,18 @@ def get_disclaimer():
 
     try:
         document = provider.fetch_document("disclaimer")
+
+        return document.text
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+@router.get("/system_message", response_class=PlainTextResponse)
+def get_system_message():
+    """Endpoint para obter a Mensagem do sistema"""
+    LOGGER.debug("Recebida requisição em /system_message com parâmetros: {}")
+
+    try:
+        document = provider.fetch_document("system_message")
 
         return document.text
     except Exception as e:
