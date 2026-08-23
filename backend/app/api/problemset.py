@@ -224,6 +224,8 @@ def get_problems(params: Annotated[FilterParams, Query()]):
                 query = query.filter(Problem.tags.any(name=tag))
 
         total_count = query.count()
+        if total_count == 0:
+            return EMPTY_RESPONSE
 
         if not is_valid_page(params.page, params.limit, total_count):
             return ProblemResponse(

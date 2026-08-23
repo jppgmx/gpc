@@ -160,6 +160,8 @@ def get_contests(params: Annotated[FilterParams, Query()]):
                 query = query.order_by(getattr(Contest, params.order_by))
 
         total = query.count()
+        if total == 0:
+            return EMPTY_RESPONSE
         if not is_valid_page(params.page, params.limit, total):
             return ContestResponse(
                 error="Página inválida",

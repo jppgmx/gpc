@@ -47,7 +47,7 @@ tente traduzir/naturalizar esses termos e demais (Ex.: Terminado, "Codando", Cod
             index: $fromAI("index", "Permite procurar por índice (ex.: A, B, C, D1, D2)", "string"),
             rating: $fromAI("rating", "O rating do problema para pesquisa.", "number"),
             min_points: $fromAI("min_points", "Pesquisar pela quantidade mínima de pontos. Pode ser ponto flutuante.", "number"),
-        tags: $fromAI("tags", "Lista de tags separadas por vírgula (Ex.: \"brute force,math,dp\")", "string"),
+            tags: $fromAI("tags", "Lista de tags separadas por vírgula (Ex.: \"brute force,math,dp\")", "string"),
             order_by: $fromAI("order_by", "Lista de campos para ordenar separados por vírgula, pode ser 'contestId', 'index', 'solvedCount', 'rating', 'points', 'name'. Use o prefixo - em um campo para tornar decrescente. A ordem importa. (Ex1.: contestId,index; Ex2.: -solvedCount)", "string"),
             limit: $fromAI("limit", "Limite de problemas a retornar (1-100).", "number"),
             page: $fromAI("page", "Página de resultados.", "number"),
