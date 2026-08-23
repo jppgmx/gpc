@@ -42,6 +42,7 @@ Projeto desenvolvido para o Challenge Agente da Alura, em parceria com a
 Oracle Next Education (ONE).
 
 Agente está hospedado na AWS, você pode experimentar no Telegram: @gpc14_bot
+
 ![Execução do n8n na AWS](images/gpc-n8n.jpeg)
 
 ## Não afiliação e transparência
@@ -393,9 +394,13 @@ Note que terá que inserir manualmente quaisquer credenciais usados.
 ## Exemplos de perguntas e respostas
 
 Confira alguns exemplos e demonstração:
-![Amostra 1](images/gpc-demo.jpg)
-![Amostra 2](images/gpc-demo-2.jpg)
-![Amostra 3](images/gpc-demo-3.jpg)
+
+<div align="center" style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
+  <img src="images/gpc-demo.jpg" alt="Amostra 1" width="250" />
+  <img src="images/gpc-demo-2.jpg" alt="Amostra 2" width="250" />
+  <img src="images/gpc-demo-3.jpg" alt="Amostra 3" width="250" />
+</div>
+
 
 > O que é a Política de Privacidade?
 ```markdown
