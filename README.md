@@ -1,5 +1,8 @@
 # GPC (Garoto de Programa Competitivo)
 
+![Logo horizontal do GPC](images/gpc-horizontal-logo-1.png)
+*(Design feito por @Dom-Henrique)*
+
 Assistente de IA não oficial para o ecossistema Codeforces — ajuda a explorar a
 plataforma, tira dúvidas sobre suas regras e dá suporte a quem está mergulhando
 em programação competitiva.
@@ -38,8 +41,9 @@ parceria com a Alura.
 Projeto desenvolvido para o Challenge Agente da Alura, em parceria com a
 Oracle Next Education (ONE).
 
-A próxima etapa é tentar fazer deploy, a ideia era usar OCI, mas devido uns
-problemas, estarei usando a AWS.
+Agente está hospedado na AWS, você pode experimentar no Telegram: @gpc14_bot
+
+![Execução do n8n na AWS](images/gpc-n8n.jpeg)
 
 ## Não afiliação e transparência
 
@@ -386,6 +390,142 @@ make import-workflows
 ```
 
 Note que terá que inserir manualmente quaisquer credenciais usados.
+
+## Exemplos de perguntas e respostas
+
+Confira alguns exemplos e demonstração:
+
+<div align="center" style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
+  <img src="images/gpc-demo.jpg" alt="Amostra 1" width="250" />
+  <img src="images/gpc-demo-2.jpg" alt="Amostra 2" width="250" />
+  <img src="images/gpc-demo-3.jpg" alt="Amostra 3" width="250" />
+</div>
+
+
+> O que é a Política de Privacidade?
+```markdown
+A Política de Privacidade do Codeforces explica como os dados pessoais dos usuários são coletados, usados e protegidos. Aqui estão os principais pontos:
+
+1. **Coleta de Dados**: Os dados pessoais podem ser fornecidos pelo usuário ou coletados automaticamente durante o uso da plataforma. Isso inclui o uso de cookies e outras ferramentas de rastreamento para identificar usuários e lembrar suas preferências.
+
+2. **Uso de Dados**: Os dados são usados para fornecer os serviços solicitados pelo usuário. A falha em fornecer certos dados pode impedir que a plataforma funcione corretamente.
+
+3. **Responsabilidade do Usuário**: Os usuários são responsáveis por quaisquer dados de terceiros que compartilhem através da plataforma.
+
+4. **Divulgação de Dados**: O Codeforces pode ser obrigado a revelar dados pessoais a autoridades públicas, se solicitado.
+
+5. **Informações Adicionais**: A plataforma pode fornecer informações adicionais sobre a coleta e processamento de dados pessoais, mediante solicitação.
+
+6. **Logs do Sistema e Manutenção**: Para operação e manutenção, a plataforma e serviços de terceiros podem coletar logs de interação.
+
+7. **Análise de Dados**: Ferramentas como o Google Analytics são usadas para monitorar e analisar o tráfego da web e o comportamento do usuário, às vezes compartilhando essas informações de forma agregada e anônima com terceiros.
+
+8. **Geolocalização**: A plataforma pode coletar e usar dados de localização para fornecer serviços baseados em localização, desde que o usuário autorize explicitamente.
+
+Recomendo verificar a Política de Privacidade oficial do Codeforces para obter informações completas e atualizadas.
+```
+
+> Procure pelo problema Watermelon
+```markdown
+Encontrei o problema **4A** com o nome "Watermelon". Ele tem um **rating de 800** e está associado às tags **brute force** e **math**.
+```
+
+> O que é a tag "brute force"?
+```markdown
+A tag **"brute force"** refere-se a problemas que podem ser resolvidos usando a técnica de **força bruta**, que envolve testar e iterar por todas as possibilidades possíveis de resposta até encontrar a solução correta. É uma abordagem direta, mas pode ser ineficiente para problemas grandes devido ao alto custo computacional.
+```
+
+> Qual a próxima contest do Codeforces?
+```markdown
+A próxima contest é o **Codeforces Round (Div. 2)**, que ocorrerá no dia **29 de agosto de 2026**, das **11:35 às 13:35**, no horário de Brasília. Ela é **Rated**.
+```
+
+> Determine o total de questões que nunca foram resolvidas no Codeforces.
+```markdown
+Aqui estão os problemas com a menor quantidade de resoluções:
+
+- **1953A**: Accuracy-Preserving Summation Algorithm
+- **1885A**: Deterministic Scheduling for Extended Reality over 5G and Beyond
+- **1639K**: Treasure Hunt
+- **1639J**: Treasure Hunt
+- **1639I**: Treasure Hunt
+- **1639H**: Treasure Hunt
+- **1639G**: Treasure Hunt
+- **1639F**: Treasure Hunt
+- **1639E**: Treasure Hunt
+- **1639D**: Treasure Hunt
+- **1639C**: Treasure Hunt
+- **1639B**: Treasure Hunt
+- **1639A**: Treasure Hunt
+- **1576A**: Communication Routing Challenge
+- **1160A2**: Collaboration
+- **92114**: Labyrinth-14
+- **92113**: Labyrinth-13
+- **92112**: Labyrinth-12
+- **92111**: Labyrinth-11
+- **92110**: Labyrinth-10
+- **92109**: Labyrinth-9
+- **92108**: Labyrinth-8
+- **92107**: Labyrinth-7
+- **92106**: Labyrinth-6
+- **92105**: Labyrinth-5
+- **92104**: Labyrinth-4
+- **92103**: Labyrinth-3
+- **92102**: Labyrinth-2
+- **92101**: Labyrinth-1
+- **775A**: University Schedule
+
+Todos esses problemas têm **0 resoluções**.
+```
+
+> Houve alguma stream esse mês?
+```markdown
+Sim, houve as seguintes streams este mês:
+
+1. **Stream: CF R 1113 (Div. 2) Upsolving**
+   - **Data e Hora:** 1 de agosto de 2026, 14:15 (Horário de Brasília)
+   - **Host:** Arpa
+
+2. **Stream: CF R 1113 Solution Discussion**
+   - **Data e Hora:** 1 de agosto de 2026, 14:15 (Horário de Brasília)
+   - **Host:** aryanc403
+
+3. **Stream: Easy CF Problems**
+   - **Data e Hora:** 7 de agosto de 2026, 10:40 (Horário de Brasília)
+   - **Host:** Errichto
+
+4. **Stream: CF 1116 div1+2**
+   - **Data e Hora:** 10 de agosto de 2026, 09:00 (Horário de Brasília)
+   - **Host:** Errichto
+
+5. **Stream: IOI Live Commentary day 1**
+   - **Data e Hora:** 11 de agosto de 2026, 03:30 (Horário de Brasília)
+   - **Host:** Errichto
+
+6. **Stream: IOI Live Commentary day 2**
+   - **Data e Hora:** 13 de agosto de 2026, 03:30 (Horário de Brasília)
+   - **Host:** Errichto
+
+7. **Stream: AC Beginner Contest 471 discussion**
+   - **Data e Hora:** 15 de agosto de 2026, 10:45 (Horário de Brasília)
+   - **Host:** Errichto
+
+8. **Stream: AC Regular Contest 227 discussion**
+   - **Data e Hora:** 16 de agosto de 2026, 11:05 (Horário de Brasília)
+   - **Host:** Errichto
+
+9. **Stream: Using AI to solve problems**
+   - **Data e Hora:** 19 de agosto de 2026, 10:05 (Horário de Brasília)
+   - **Host:** Errichto
+
+10. **Stream: CSES Dynamic Programming part 3**
+    - **Data e Hora:** 22 de agosto de 2026, 07:05 (Horário de Brasília)
+    - **Host:** Errichto
+
+11. **Stream: CSES Dynamic Programming part 4**
+    - **Data e Hora:** 23 de agosto de 2026, 10:05 (Horário de Brasília)
+    - **Host:** Errichto
+```
 
 ## Limpeza do ambiente
 
