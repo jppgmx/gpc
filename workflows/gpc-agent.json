@@ -1,21 +1,23 @@
 {
-  "updatedAt": "2026-08-17T13:03:09.565Z",
+  "updatedAt": "2026-08-23T19:09:05.624Z",
   "createdAt": "2026-08-03T18:38:26.827Z",
   "id": "EfGUhRGM7wMCYnyR",
   "name": "gpc-agent",
   "description": null,
-  "active": true,
+  "active": false,
   "isArchived": false,
   "nodes": [
     {
       "parameters": {
-        "options": {}
+        "options": {
+          "maxRetries": 3
+        }
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatCohere",
       "typeVersion": 1,
       "position": [
-        32,
-        208
+        928,
+        256
       ],
       "id": "31239c39-1ef5-440a-bcfa-b679f80a0f37",
       "name": "Cohere Chat Model",
@@ -29,13 +31,13 @@
     {
       "parameters": {
         "sessionIdType": "customKey",
-        "sessionKey": "={{ $json.message.chat.id }}"
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
       },
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.4,
       "position": [
-        160,
-        208
+        1056,
+        256
       ],
       "id": "e2bc009b-c865-420e-9dea-e2cbc8d2a55d",
       "name": "Simple Memory"
@@ -47,8 +49,8 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
       "typeVersion": 1,
       "position": [
-        496,
-        416
+        1392,
+        464
       ],
       "id": "0c9e7be8-762e-48e9-8974-4c877897dd0d",
       "name": "Embeddings Cohere",
@@ -68,8 +70,8 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        288,
-        208
+        1184,
+        256
       ],
       "id": "65bcad99-fbd6-4dbb-b7c1-4b9990b72417",
       "name": "CF System Status"
@@ -82,169 +84,50 @@
           "__rl": true,
           "value": "gpc_vs_documents",
           "mode": "id"
-        }
+        },
+        "topK": 5
       },
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
       "typeVersion": 1.3,
       "position": [
-        416,
-        208
+        1312,
+        256
       ],
       "id": "a849f32d-cf0a-4896-8888-6cdd04092e43",
       "name": "Documents Vector Store"
     },
     {
       "parameters": {
-        "toolDescription": "Busca eventos do calendário de contests ou de streams/discussões do Codeforces. Use para responder perguntas sobre próximos contests, eventos em um período específico, ou busca por nome de contest/evento (ex: \"Huawei\", \"ICPC\").",
-        "url": "=http://backend:8000/api/calendar/{{ $fromAI(\"calendar_id\", \"primary para contests oficiais, misc para streams/discussões\", \"string\") }}/events",
+        "toolDescription": "Busca por vários problemas do Codeforces. Use quando o usuário queira pesquisar por problemas pelo nome (Ex.: \"Watermelon\", \"Boot Camp\"), pertencentes a uma contest (Ex.: 4), possui índice específico (Ex.: B), rating (Ex.: 800), pontos mínimos (Ex.: 200), tags (Ex.: math, dp, implementation). Permite ordenamento por diversos fatores.\n\nDeixe vazio/omita se não for relevante para a pergunta — não preencha com valor padrão.",
+        "url": "http://backend:8000/api/problemset/problems",
         "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "q",
-              "value": "={{ $fromAI(\"q\", \"Termo de busca textual livre para filtrar eventos por nome/descrição\", \"string\") }}"
-            },
-            {
-              "name": "start",
-              "value": "={{ $fromAI(\"start\", \"Data de início do intervalo (RFC 3339). Deixe vazio se o usuário não mencionar um período específico — buscas por nome/texto (q) já cobrem todos os períodos automaticamente\", \"string\") }}"
-            },
-            {
-              "name": "end",
-              "value": "={{ $fromAI(\"end\", \"Data de término do intervalo (RFC 3339). Deixe vazio se o usuário não mencionar um período específico\", \"string\") }}"
-            },
-            {
-              "name": "order_by",
-              "value": "={{ $fromAI(\"order_by\", \"startTime para ordenar por data do evento, updated para última modificação\", \"string\") }}"
-            },
-            {
-              "name": "limit",
-              "value": "={{ $fromAI(\"limit\", \"Número máximo de eventos a retornar.\", \"number\") }}"
-            },
-            {
-              "name": "timezone",
-              "value": "America/Sao_Paulo"
-            },
-            {
-              "name": "page",
-              "value": "={{ $fromAI(\"page\", \"A página a procurar na pesquisa, caso haja mais itens acima do limite.\", \"number\") }}"
-            }
-          ]
-        },
+        "specifyQuery": "json",
+        "jsonQuery": "={{ JSON.stringify((() => {\n  const NUMERIC_FIELDS = new Set([\"contest_id\", \"rating\", \"min_points\", \"limit\", \"page\"]);\n  const params = {\n    q: $fromAI(\"q\", \"Pesquisa pelo nome ou parte.\", \"string\", undefined),\n    contest_id: $fromAI(\"contest_id\", \"Permite procurar um conjunto de questões de uma contest.\", \"number\"),\n    index: $fromAI(\"index\", \"Permite procurar por índice (ex.: A, B, C, D1, D2)\", \"string\"),\n    rating: $fromAI(\"rating\", \"O rating do problema para pesquisa.\", \"number\"),\n    min_points: $fromAI(\"min_points\", \"Pesquisar pela quantidade mínima de pontos. Pode ser ponto flutuante.\", \"number\"),\n  tags: $fromAI(\"tags\", \"Lista de tags separadas por vírgula (Ex.: \\\"brute force,math,dp\\\")\", \"string\"),\n    order_by: $fromAI(\"order_by\", \"Lista de campos para ordenar separados por vírgula, pode ser 'contestId', 'index', 'solvedCount', 'rating', 'points', 'name'. Use o prefixo - em um campo para tornar decrescente. A ordem importa. (Ex1.: contestId,index; Ex2.: -solvedCount)\", \"string\"),\n    limit: $fromAI(\"limit\", \"Limite de problemas a retornar (1-100).\", \"number\"),\n    page: $fromAI(\"page\", \"Página de resultados.\", \"number\"),\n  };\n\n  return Object.fromEntries(\n    Object.entries(params).filter(([key, v]) => {\n      if (v === undefined || v === null || v === \"\") return false;\n      if (NUMERIC_FIELDS.has(key) && v === 0) return false;\n      return true;\n    })\n  );\n})()) }}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        704,
-        208
-      ],
-      "id": "c8e89c3f-e2b6-44b1-a5ef-94a81de3237f",
-      "name": "Calendar"
-    },
-    {
-      "parameters": {
-        "toolDescription": "Busca por problemas do Codeforces.",
-        "url": "=http://backend:8000/api/problemset/problems{{ $fromAI(\"problemId\", \"Caso o usuário deseja uma questão específica, passe o ID do problema na URL, sem passar no query params, passe com / como prefixo.\", \"string\") }}",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "q",
-              "value": "={{ $fromAI(\"q\", \"O termo de pesquisa.\", \"string\") }}"
-            },
-            {
-              "name": "contest_id",
-              "value": "={{ $fromAI(\"contest_id\", \"Permite procurar um conjunto de questões de uma contest.\", \"number\") }}"
-            },
-            {
-              "name": "index",
-              "value": "={{ $fromAI(\"index\", \"Permite procurar por índice (ex.: A, B, C, D1, D2, etc.). Se usar índice junto com o id da contest, equivale a /problems/{contestId+index}\", \"string\") }}"
-            },
-            {
-              "name": "rating",
-              "value": "={{ $fromAI(\"rating\", \"O rating do problema para pesquisa.\", \"number\") }}"
-            },
-            {
-              "name": "min_points",
-              "value": "={{ $fromAI(\"min_points\", \"Pesquisar pela quantidade mínima de pontos que dá para conseguir. Pode ser ponto flutuante.\", \"number\") }}"
-            },
-            {
-              "name": "tags",
-              "value": "={{ $fromAI(\"tags\", \"Lista de tags do problema separados por vírgula. (Ex.: implementation,brute force)\") }}"
-            },
-            {
-              "name": "order_by",
-              "value": "={{ $fromAI(\"order_by\", \"Lista de campos para ordenar separados por vírgula, pode ser 'contestId', 'index', 'solvedCount', 'rating', 'points', 'name'. Use o prefixo - em um campo para tornar decrescente. A ordem importa. (Ex1.: contestId,index; Ex2.: -solvedCount)\", \"string\") }}"
-            },
-            {
-              "name": "limit",
-              "value": "={{ $fromAI(\"limit\", \"O limite de problemas a retornar. Min.: 1, Max.: 100, Padrão: 10\", \"number\") }}"
-            },
-            {
-              "name": "page",
-              "value": "={{ $fromAI(\"page\", \"Use quando tiver mais itens e o usuário queira continuar a pesquisa.\", \"number\") }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequestTool",
-      "typeVersion": 4.4,
-      "position": [
-        832,
-        208
+        1600,
+        256
       ],
       "id": "cf7a0d71-f754-42e3-9840-10ef5c5845df",
       "name": "Problemset"
     },
     {
       "parameters": {
-        "toolDescription": "Busca por contests do Codeforces de forma detalhada, podendo atuar em conjunto com o a ferramenta de Calendário para uma pesquisa mais ampla. Se estiver pesquisando uma contest específca, passe o ID na URL, e não passe query params a mais.",
-        "url": "=http://backend:8000/api/contests/{{ $fromAI(\"contestId\", \"Caso o usuário procure uma contest específica, passe na URL o ID dela.\", \"number\") }}",
+        "toolDescription": "Busca por contests do Codeforces de forma detalhada. Use para obter além de informações sobre data/hora, também informações como fase e tipo.",
+        "url": "=http://backend:8000/api/contests/",
         "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "pretty_datetime",
-              "value": "true"
-            },
-            {
-              "name": "timezone",
-              "value": "America/Sao_Paulo"
-            },
-            {
-              "name": "q",
-              "value": "={{ $fromAI(\"q\", \"Procura contests pelo nome.\", \"string\") }}"
-            },
-            {
-              "name": "type",
-              "value": "={{ $fromAI(\"type\", \"Filtra pelo tipo da contest: CF, IOI, ICPC.\", \"string\") }}"
-            },
-            {
-              "name": "phase",
-              "value": "={{ $fromAI(\"phase\", \"Pesquisa pela fase atual da contest: BEFORE, CODING, PENDING_SYSTEM_TEST, SYSTEM_TEST, FINISHED\", \"string\") }}"
-            },
-            {
-              "name": "order_by",
-              "value": "={{ $fromAI(\"order_by\", \"Ordena por campo: id. Use o prefixo - para inverter a ordenação.\") }}"
-            },
-            {
-              "name": "limit",
-              "value": "={{ $fromAI(\"limit\", \"O limite de contests a retornar. Min.: 1, Max.: 100, Padrão: 10\", \"number\") }}"
-            },
-            {
-              "name": "page",
-              "value": "={{ $fromAI(\"page\", \"Use quando tiver mais itens e o usuário queira continuar a pesquisa.\", \"number\") }}"
-            }
-          ]
-        },
+        "specifyQuery": "json",
+        "jsonQuery": "={{ \n  JSON.stringify(\n    (() => {\n      const NUMERIC_FIELDS = new Set([\"limit\", \"page\"]);\n      const params = {\n        pretty_datetime: true,\n        timezone: $fromAI(\"timezone\", \"O fuso horário a aplicar.\", \"string\", \"America/Sao_Paulo\"),\n        q: $fromAI(\"q\", \"Procura contests nome/termo específico.\", \"string\"),\n        type: $fromAI(\"type\", \"Filtra pelo tipo da contest: CF, IOI, ICPC.\", \"string\"),\n        phase: $fromAI(\"phase\", \"Pesquisa pela fase atual da contest: BEFORE, CODING, PENDING_SYSTEM_TEST, SYSTEM_TEST, FINISHED\", \"string\"),\n        order_by: $fromAI(\"order_by\", \"Ordena por campo: id. Use o prefixo - para inverter a ordenação.\"),\n        limit: $fromAI(\"limit\", \"O limite de contests a retornar. Min.: 1, Max.: 100, Padrão: 10\", \"number\"),\n        page: $fromAI(\"page\", \"Use quando tiver mais itens e o usuário queira continuar a pesquisa.\", \"number\")\n      }\n      return Object.fromEntries(\n    Object.entries(params).filter(([key, v]) => {\n      if (v === undefined || v === null || v === \"\") return false;\n      if (NUMERIC_FIELDS.has(key) && v === 0) return false;\n      return true;\n    })\n  );\n    })()\n  )\n}}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
       "position": [
-        960,
-        208
+        1728,
+        256
       ],
       "id": "0658348a-f70b-414b-bb19-1afdc4407092",
       "name": "Contests"
@@ -252,19 +135,20 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "={{ $json.message.text }}",
+        "text": "={{ $('Telegram Trigger').item.json.message.text }}",
         "options": {
-          "systemMessage": "=Você é o GPC (Garoto de Programa Competitivo), um assistente de IA especializado em ajudar usuários a navegar a plataforma Codeforces.\n\nIdentidade e transparência:\n- Você NÃO é afiliado, endossado ou mantido pelo Codeforces. É um projeto pessoal e independente.\n- Na primeira mensagem de uma conversa nova, apresente-se brevemente e deixe claro que é um assistente não-oficial que pode cometer erros.\n- Se o usuário perguntar sobre sua natureza, afiliação, ou confiabilidade, use a informação do disclaimer para responder com transparência total.\n\nSeu escopo:\n- Explicar regras, diretrizes conforme os Termos e Condições e a Política de Privacidade\n- Avisar sobre quaisquer mudanças no sistema da plataforma\n- Informar sobre calendário de contests, podendo combinar outra tool para mais detalhes como status e fase\n- Ajudar a buscar problemas do banco de questões por rating/tag, nome, contests e demais filtros\n- Dar suporte a dúvidas de programação em C/C++ (WIP)\n\nRegras:\n- Se não souber algo com certeza, diga que não sabe em vez de inventar uma resposta\n- Para questões sobre termos de uso, política de privacidade ou regras oficiais, sempre recomende que o usuário confira a fonte oficial do Codeforces, já que você pode estar desatualizado\n- Respostas objetivas, sem enrolação\n- Responda sempre em português, a menos que o usuário escreva em outro idioma\n\nSobre documentos:\n- Os documentos do CodeForces podem estar no idioma inglês, então:\n  - Termos e Condições (ou Termos): \"Terms and Conditions\";\n  - Política de Privacidade: \"Privacy Policy\";\n- Analise as informações com cautela\n\nSobre datas e eventos:\n- Ao interpretar perguntas sobre contests/eventos, assuma que o usuário se refere a eventos futuros ou em andamento, a menos que ele peça explicitamente por histórico ou eventos passados.\n- \"recente\", \"próximo\", \"que vem aí\" geralmente significam eventos futuros nesse contexto — não passados.\n- Ao fazer busca por nome/texto (q), evite adicionar filtro de data a menos que o usuário mencione um período específico.\n- Sempre diga a data/hora do evento, o fuso horário se necessário.\n- O limite de eventos a buscar é de, no mínimo, 1, no máximo, 100 eventos.\n- Dependendo da pesquisa, se tiver mais eventos do que o limite especificado, pergunta se quer continuar a pesquisa.\n- Você pode fazer até três tentativas para obter uma resposta em caso de erro, após isso, continua o trabalho mesmo assim.\n\nSobre problemas e contests:\n- Um ID de um problema é formado pelo ID da contest, em geral, numérico, e o índice do problema, composto por letra e um número para indicar variante, situado naquela contest. - Por exemplo: 4A, a ID da contest é a 4 e o índice é A; 2255E1, a ID da contest é a 2255 e o índice é E1, note que 1 indica que é, em geral, uma variante fácil, 2 indica uma variante difícil.\n- É possível que no calendário a descrição de um evento, no caso, contests, possuem um link https://codeforces.com/contests/ID onde ID é o ID da contest, você pode usar o Calendário como ua tentativa de procurar o evento que possui um link com esse ID.\n- Historicamente, havia streams no calendário primário, então quando o usuário pedir uma stream antiga, considere pesquisar ambos\n- Por exemplo: https://codeforces.com/contests/2257\n- Para contests, você possui duas ferramentas para isso, sempre que possível, use as em conjunto para pesquisa de forma ampla, pois uma pode indicar eventos, data/hora e a outra status como não iniciado, inicidado, terminado etc.\n- Você pode montar links para o problema usando o template https://codeforces.com/problemset/problem/CONTEST_ID/INDICE\n\nContexto:\n- Hoje é {{$now.format('yyyy-MM-dd')}}"
+          "systemMessage": "={{ $json.data }}"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        416,
-        -32
+        1616,
+        16
       ],
       "id": "74300270-7109-4e27-b3a8-f1707331fe43",
-      "name": "Garoto"
+      "name": "Garoto",
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -276,16 +160,16 @@
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1.5,
       "position": [
-        176,
-        -32
+        896,
+        -160
       ],
       "id": "95c55f02-d7e0-4b05-b09b-678750dc2336",
       "name": "Telegram Trigger",
       "webhookId": "1c006b31-d678-478e-a4de-4879faa4dec9",
       "credentials": {
         "telegramApi": {
-          "id": "zbRDPHwgAGZhtU39",
-          "name": "GPC-Bot"
+          "id": "TRu7LsZTA0MyufcE",
+          "name": "GPC-Bot-dev"
         }
       }
     },
@@ -294,24 +178,184 @@
         "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
         "text": "={{ $json.output }}",
         "additionalFields": {
-          "appendAttribution": false
+          "appendAttribution": false,
+          "parse_mode": "HTML"
         }
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        768,
-        -32
+        2384,
+        0
       ],
       "id": "17ccf5aa-b3e5-499d-bc44-55f2dfe254c6",
       "name": "Send a text message",
       "webhookId": "0b65e43e-c02f-4d48-87f6-e4000a2c4a51",
       "credentials": {
         "telegramApi": {
-          "id": "zbRDPHwgAGZhtU39",
-          "name": "GPC-Bot"
+          "id": "TRu7LsZTA0MyufcE",
+          "name": "GPC-Bot-dev"
         }
       }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Busca eventos do calendário de contests ou de streams/discussões do Codeforces. Use para responder perguntas sobre próximos contests, eventos em um período específico com início e fim, no formato completo do RFC 3339, ou busca por nome de contest/evento (ex: \"Huawei\", \"ICPC\", \"Round\", \"CF R\"). Também permite ordenação.",
+        "url": "=http://backend:8000/api/calendar/{{ $fromAI(\"calendar_id\", \"primary para contests oficiais, misc para streams/discussões\", \"string\") }}/events",
+        "sendQuery": true,
+        "specifyQuery": "json",
+        "jsonQuery": "={{\n  JSON.stringify(\n      (() => {\n        const NUMERIC_FIELDS = new Set([\"limit\", \"page\"])\n        const params = {\n          q: $fromAI(\"q\", \"Termo de busca textual livre para filtrar eventos por nome/descrição\", \"string\"),\n          start: $fromAI(\"start\", \"Data de início do intervalo (RFC 3339). Deixe vazio se o usuário não mencionar um período específico — buscas por nome/texto (q) já cobrem todos os períodos automaticamente\", \"string\"),\n          end: $fromAI(\"end\", \"Data de término do intervalo (RFC 3339). Deixe vazio se o usuário não mencionar um período específico\", \"string\"),\n          order_by: $fromAI(\"order_by\", \"startTime para ordenar por data do evento, updated para última modificação\", \"string\"),\n          timezone: \"America/Sao_Paulo\",\n          limit: $fromAI(\"limit\", \"Número máximo de eventos a retornar (1-100).\", \"number\"),\n          page: $fromAI(\"page\", \"A página a procurar na pesquisa, caso haja mais itens acima do limite.\", \"number\")\n        }\n  \n        return Object.fromEntries(\n          Object.entries(params).filter(([key, v]) => {\n            if (v === undefined || v === null || v === \"\") return false;\n            if (NUMERIC_FIELDS.has(key) && v === 0) return false;\n            return true;\n          })\n        )\n      })()\n    )\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        1856,
+        256
+      ],
+      "id": "c8e89c3f-e2b6-44b1-a5ef-94a81de3237f",
+      "name": "Events"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Busca por informações sobre um calendário como ID, sumário e fuso horário.\nCalendários disponíveis:\n- primary: calendário principal de contests e com eventos históricos;\n- misc: calendário miscelânea voltado a streams/discussões e outros;\n- all: todos os calendários",
+        "url": "=http://backend:8000/api/calendar/{{$fromAI(\"calendarId\", \"primary para contests oficiais, misc para streams/discussões, all para todos\", \"string\")}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        1984,
+        256
+      ],
+      "id": "c5795ea6-eb13-4714-a16f-7cc190bbd905",
+      "name": "Calendar"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Busca por um problema específico do Codeforces (Ex.: 4A, 1346B, 2206M, 2081G2, 2207H2)",
+        "url": "=http://backend:8000/api/problemset/problems/{{ $fromAI(\"problemId\", \"O ID do problema\", \"string\") }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        2112,
+        256
+      ],
+      "id": "0db0be22-2c46-4d65-8e2f-a244a0505cb1",
+      "name": "Problem"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Lista as tags válidas de classificação de problemas do Codeforces, com descrição quando disponível. Use antes de filtrar problemas por tag (ex: no Problemset) se não tiver certeza do nome exato em inglês, ou se o usuário descrever um conceito de forma vaga (ex: 'problemas de matemática modular' → busque aqui primeiro pra achar 'chinese remainder theorem' ou 'number theory').",
+        "url": "http://backend:8000/api/problemset/tags",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        2240,
+        256
+      ],
+      "id": "731da579-6bc8-4143-b52e-e5e3bbc0c4f3",
+      "name": "Tags"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Busca por uma contest específica do Codeforces com base em seu ID.",
+        "url": "=http://backend:8000/api/contests/{{ $fromAI(\"contestId\", \"O ID da contest a procurar.\", \"number\") }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "pretty_datetime",
+              "value": "true"
+            },
+            {
+              "name": "timezone",
+              "value": "America/Sao_Paulo"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        2368,
+        256
+      ],
+      "id": "1566bd2e-11ca-4de9-bfd1-60dab5da4f53",
+      "name": "Contest"
+    },
+    {
+      "parameters": {
+        "jsCode": "let data = $input.first().json.data\n\nreturn [\n  {\n    json: {\n      data: data.replace(\"{{TODAY}}\", $now.toFormat('yyyy-MM-dd HH:mm:ss') + ` (Fuso: ${$now.zoneName})`)\n    }\n  }\n]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1376,
+        16
+      ],
+      "id": "0e78e030-65f1-4711-99e2-57db9a3171e8",
+      "name": "Normalize"
+    },
+    {
+      "parameters": {
+        "jsCode": "const error = $input.first().json.error\nconsole.log(\"Erro ao obter a mensagem do sistema: \" + error.message)\nconsole.log(error)\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2000,
+        -144
+      ],
+      "id": "9859030b-8e9e-4c34-bf84-a68f3fb4767f",
+      "name": "Report"
+    },
+    {
+      "parameters": {
+        "url": "http://backend:8000/docs/system_message",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1120,
+        -160
+      ],
+      "id": "a5efffec-50ac-4dce-bb14-8f89ef794894",
+      "name": "System Message",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7c302caa-f5c4-43b3-b73a-e6ba1932ca44",
+              "name": "output",
+              "value": "Desculpe, estou com dificuldades técnicas no momento. Tente novamente em instantes 🙁",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2160,
+        -144
+      ],
+      "id": "4b7265e8-9480-443c-9cf5-bb5a52d35ac9",
+      "name": "Fallback Message"
     }
   ],
   "connections": {
@@ -370,17 +414,6 @@
         ]
       ]
     },
-    "Calendar": {
-      "ai_tool": [
-        [
-          {
-            "node": "Garoto",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Problemset": {
       "ai_tool": [
         [
@@ -407,7 +440,7 @@
       "main": [
         [
           {
-            "node": "Garoto",
+            "node": "System Message",
             "type": "main",
             "index": 0
           }
@@ -415,6 +448,119 @@
       ]
     },
     "Garoto": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Events": {
+      "ai_tool": [
+        [
+          {
+            "node": "Garoto",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "Garoto",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Problem": {
+      "ai_tool": [
+        [
+          {
+            "node": "Garoto",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tags": {
+      "ai_tool": [
+        [
+          {
+            "node": "Garoto",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contest": {
+      "ai_tool": [
+        [
+          {
+            "node": "Garoto",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize": {
+      "main": [
+        [
+          {
+            "node": "Garoto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Report": {
+      "main": [
+        [
+          {
+            "node": "Fallback Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "System Message": {
+      "main": [
+        [
+          {
+            "node": "Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fallback Message": {
       "main": [
         [
           {
@@ -437,9 +583,9 @@
   },
   "nodeGroups": [],
   "pinData": {},
-  "versionId": "9d4deba6-c2d6-435c-a9bf-bde959e892a4",
-  "activeVersionId": "9d4deba6-c2d6-435c-a9bf-bde959e892a4",
-  "versionCounter": 645,
+  "versionId": "d23baa10-4784-4e17-b52f-4f388fe9fadb",
+  "activeVersionId": null,
+  "versionCounter": 1260,
   "triggerCount": 1,
   "sourceWorkflowId": null,
   "tags": [],
@@ -464,7 +610,7 @@
     }
   ],
   "versionMetadata": {
-    "name": "1.0",
-    "description": "Publicação de uma versão \"estável\"."
+    "name": null,
+    "description": null
   }
 }

@@ -132,7 +132,13 @@ tree:
 		-I __pycache__ \
 		-I __init__.py \
 		-I gpc_backend.egg-info \
+		-I 'round-*-results-*.md|round-*.md' \
 		.
+
+# Sync manual de assets para dentro de .data
+sync-assets:
+	mkdir -p $(BACKEND_DIR)/app/.data/.assets
+	cp -rv $(BACKEND_DIR)/assets/* $(BACKEND_DIR)/app/.data/.assets
 
 # Cria venv caso não exista
 $(VENV_DIR):

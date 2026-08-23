@@ -8,7 +8,7 @@ import psutil
 
 from fastapi import FastAPI
 
-from api import docs, calendar, problemset, contests
+from api import docs, calendar, problemset, contests, tags
 from services.data_store import DataStore
 from services.logging import setup_logging
 from services.profiling import start_profiling
@@ -44,6 +44,7 @@ app = FastAPI(
 app.include_router(docs.router, prefix="/docs")
 app.include_router(calendar.router, prefix="/api")
 app.include_router(problemset.router, prefix="/api")
+app.include_router(tags.router, prefix="/api")
 app.include_router(contests.router, prefix="/api")
 
 @app.get("/health")

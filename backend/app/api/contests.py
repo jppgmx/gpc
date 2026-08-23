@@ -23,7 +23,7 @@ class BasicOptions(BaseModel):
     pretty_datetime: Optional[bool] = Field(
         False,
         description="Se True, retorna a data/hora em formato ISO 8601, " \
-        "caso contrário, juntamente com a data/hora em segundos desde a época Unix," \
+        "juntamente com a data/hora em segundos desde a época Unix," \
         "além do fuso horário aplicado. O padrão é False."
     )
     timezone: Optional[str] = Field(
@@ -31,6 +31,14 @@ class BasicOptions(BaseModel):
         description="Fuso horário padrão para conversão de data/hora. " \
         "Se não fornecido, será usado o fuso horário do calendário do Google."
     )
+
+    @field_validator("timezone", mode="before")
+    @classmethod
+    def empty_string_to_none(cls, value: Optional[str]) -> Optional[str]:
+        """ Converte string vazia em None """
+        if value == "":
+            return None
+        return value
 
 Order = Literal["id"]
 class FilterParams(BasicOptions):
@@ -68,6 +76,22 @@ class FilterParams(BasicOptions):
         description="Número da página de resultados a ser retornada.",
         ge=1
     )
+
+    @field_validator("q", "type", "phase", "order_by", mode="before")
+    @classmethod
+    def empty_string_to_none(cls, value: Optional[str]) -> Optional[str]:
+        """ Converte string vazia em None """
+        if value == "":
+            return None
+        return value
+
+    @field_validator("limit", "page", mode="before")
+    @classmethod
+    def zero_to_none(cls, value: int | None) -> int | None:
+        """ Converte 0 em None """
+        if value == 0:
+            return None
+        return value
 
     @field_validator("order_by", mode="before")
     @classmethod
@@ -136,6 +160,8 @@ def get_contests(params: Annotated[FilterParams, Query()]):
                 query = query.order_by(getattr(Contest, params.order_by))
 
         total = query.count()
+        if total == 0:
+            return EMPTY_RESPONSE
         if not is_valid_page(params.page, params.limit, total):
             return ContestResponse(
                 error="Página inválida",
