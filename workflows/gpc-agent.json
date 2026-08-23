@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-23T16:42:01.253Z",
+  "updatedAt": "2026-08-23T17:22:19.717Z",
   "createdAt": "2026-08-03T18:38:26.827Z",
   "id": "EfGUhRGM7wMCYnyR",
   "name": "gpc-agent",
@@ -293,7 +293,7 @@
     },
     {
       "parameters": {
-        "jsCode": "let data = $input.first().json.data\n\nreturn [\n  {\n    json: {\n      data: data.replace(\"{{TODAY}}\", $now.toFormat('yyyy-MM-dd'))\n    }\n  }\n]"
+        "jsCode": "let data = $input.first().json.data\n\nreturn [\n  {\n    json: {\n      data: data.replace(\"{{TODAY}}\", $now.toFormat('yyyy-MM-dd HH:mm:ss') + ` (Fuso: ${$now.zoneName})`)\n    }\n  }\n]"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -581,9 +581,9 @@
   },
   "nodeGroups": [],
   "pinData": {},
-  "versionId": "f9c72a83-a9ca-403f-ae08-6b4d649091a3",
+  "versionId": "499f002e-a9db-4db0-b8f5-c6f212e1e5c2",
   "activeVersionId": null,
-  "versionCounter": 1227,
+  "versionCounter": 1245,
   "triggerCount": 1,
   "sourceWorkflowId": null,
   "tags": [],
